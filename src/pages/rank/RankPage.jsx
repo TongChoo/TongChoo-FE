@@ -124,17 +124,8 @@ function GradeNode({ tier, index, currentIndex, totalXp, nextTier }) {
       : `앞으로 ${Math.max(tier.minXp - totalXp, 0)} XP`;
 
   return (
-    <li className="flex flex-row sm:flex-1 sm:flex-col items-center gap-4 sm:gap-0">
-      <div className="flex items-center w-full">
-        {index > 0 && (
-          <span
-            className={[
-              "hidden sm:block flex-1 h-1 rounded-full",
-              index <= currentIndex ? "bg-brand-primary" : "bg-border-soft",
-            ].join(" ")}
-          />
-        )}
-
+    <li className="relative z-10 flex flex-row sm:flex-1 sm:flex-col items-center gap-4 sm:gap-0">
+      <div className="flex h-16 sm:h-20 items-center justify-center sm:w-full shrink-0">
         <div
           className={[
             "relative shrink-0 rounded-full flex items-center justify-center transition-all mx-auto",
@@ -152,15 +143,6 @@ function GradeNode({ tier, index, currentIndex, totalXp, nextTier }) {
             <TrophyIcon className="w-7 h-7 sm:w-8 sm:h-8" />
           )}
         </div>
-
-        {index < gradeTiers.length - 1 && (
-          <span
-            className={[
-              "hidden sm:block flex-1 h-1 rounded-full",
-              index < currentIndex ? "bg-brand-primary" : "bg-border-soft",
-            ].join(" ")}
-          />
-        )}
       </div>
 
       <div className="sm:mt-3 sm:text-center">
@@ -217,6 +199,7 @@ export default function RankPage() {
   const progressValue = nextTier ? Math.max(totalXp - currentTier.minXp, 0) : progressMax;
   const progressPercent = nextTier ? Math.min(Math.round((progressValue / progressMax) * 100), 100) : 100;
   const isMaxGrade = !nextTier || rank?.nextGrade === null;
+  const pathProgressRatio = currentIndex / (gradeTiers.length - 1);
 
   return (
     <main className="max-w-7xl mx-auto px-6 py-10 bg-white">
@@ -286,18 +269,29 @@ export default function RankPage() {
 
         <div className="p-6 sm:p-8 border-t border-border-soft">
           <h2 className="text-base font-bold text-navy-950">등급 체계</h2>
-          <ol className="mt-6 flex flex-col sm:flex-row gap-5 sm:gap-0">
-            {gradeTiers.map((tier, index) => (
-              <GradeNode
-                key={tier.code}
-                tier={tier}
-                index={index}
-                currentIndex={currentIndex}
-                totalXp={totalXp}
-                nextTier={nextTier}
-              />
-            ))}
-          </ol>
+          <div className="relative mt-6">
+            <span
+              className="hidden sm:block absolute left-[10%] right-[10%] top-10 h-1 rounded-full bg-border-soft"
+              aria-hidden="true"
+            />
+            <span
+              className="hidden sm:block absolute left-[10%] top-10 h-1 rounded-full bg-brand-primary"
+              style={{ width: `calc(80% * ${pathProgressRatio})` }}
+              aria-hidden="true"
+            />
+            <ol className="relative flex flex-col sm:flex-row gap-5 sm:gap-0">
+              {gradeTiers.map((tier, index) => (
+                <GradeNode
+                  key={tier.code}
+                  tier={tier}
+                  index={index}
+                  currentIndex={currentIndex}
+                  totalXp={totalXp}
+                  nextTier={nextTier}
+                />
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
     </main>
