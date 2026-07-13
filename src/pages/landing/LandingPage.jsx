@@ -7,16 +7,6 @@ const features = [
     {
         title: "AI 변명 생성",
         description: "상대와 강도만 고르면, 딱 맞는 변명이 바로 나와요.",
-        preview: (
-            <div className="mt-auto pt-4 flex flex-wrap gap-1.5">
-                <span className="text-[11px] font-medium text-brand-primary">
-                    팀장
-                </span>
-                <span className="text-[11px] font-medium text-brand-primary">
-                    개소리 모드
-                </span>
-            </div>
-        ),
         icon: (
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
         ),
@@ -24,19 +14,6 @@ const features = [
     {
         title: "성공 확률 분석",
         description: "현실성·설득력·의심 위험도까지 숫자로 확인해요.",
-        preview: (
-            <div className="mt-auto pt-4 flex items-center gap-1.5 text-center">
-                <div className="flex-1 py-2">
-                    <p className="text-sm font-bold text-brand-primary">82%</p>
-                </div>
-                <div className="flex-1 py-2">
-                    <p className="text-sm font-bold text-brand-primary">4/5</p>
-                </div>
-                <div className="flex-1 py-2">
-                    <p className="text-sm font-bold text-suspicion-medium-text">MEDIUM</p>
-                </div>
-            </div>
-        ),
         icon: (
             <>
                 <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
@@ -47,24 +24,6 @@ const features = [
     {
         title: "후폭풍 예측",
         description: "며칠 뒤 상대가 무슨 질문을 할지 미리 보여드려요.",
-        preview: (
-            <div className="mt-auto pt-4">
-                <p className="text-xs font-normal text-navy-500 truncate">
-                    "그때 정전 문제는 잘 해결됐어?"
-                </p>
-                <div className="mt-1.5 flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-navy-300">
-                        3일 뒤
-                    </span>
-                    <span className="text-[11px] font-bold text-brand-primary">
-                        붕괴 72%
-                    </span>
-                </div>
-                <div className="mt-1 h-1.5 bg-border-soft rounded-md overflow-hidden">
-                    <div className="h-full bg-brand-primary w-[72%]" />
-                </div>
-            </div>
-        ),
         icon: (
             <>
                 <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
@@ -75,17 +34,6 @@ const features = [
     {
         title: "등급 시스템",
         description: "변명을 만들수록 경험치가 쌓여 등급이 올라가요.",
-        preview: (
-            <div className="mt-auto pt-4 flex items-center gap-1.5">
-                <span className="text-[11px] font-bold text-brand-primary whitespace-nowrap">
-                    핑계 전문가
-                </span>
-                <span className="text-navy-300">›</span>
-                <span className="text-[11px] font-bold text-brand-primary whitespace-nowrap">
-                    사회생활 마스터
-                </span>
-            </div>
-        ),
         icon: (
             <>
                 <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" />
@@ -220,7 +168,7 @@ export default function LandingPage() {
                             {features.map((feature) => (
                                 <li
                                     key={feature.title}
-                                    className="bg-white rounded-2xl border border-border-soft p-7 flex flex-col min-h-[240px]"
+                                    className="bg-white rounded-2xl border border-border-soft p-7 flex flex-col min-h-[200px]"
                                 >
                                     <div className="w-14 h-14 rounded-xl bg-brand-primary-soft text-brand-primary flex items-center justify-center shrink-0">
                                         <svg
@@ -242,7 +190,6 @@ export default function LandingPage() {
                                     <p className="mt-1.5 text-sm font-normal text-navy-500 leading-relaxed">
                                         {feature.description}
                                     </p>
-                                    {feature.preview}
                                 </li>
                             ))}
                         </ul>
@@ -250,13 +197,13 @@ export default function LandingPage() {
                 </section>
 
                 <section
-                    aria-label="결과 미리보기"
+                    aria-label="결과 구성"
                     className="bg-white scroll-mt-20"
                 >
                     <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
                         <div>
                             <span className="inline-block text-xs font-medium tracking-wide text-brand-primary">
-                                실제 결과 미리보기
+                                결과 구성
                             </span>
                             <h2 className="mt-4 text-2xl md:text-3xl font-bold text-navy-950">
                                 변명 한 번에 이만큼 나와요
@@ -283,74 +230,24 @@ export default function LandingPage() {
                             </ul>
                         </div>
 
-                        <article className="bg-white rounded-2xl border border-border-soft p-6 max-w-md w-full lg:ml-auto">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-brand-primary">
-                                    팀장 · 능글맞은맛
-                                </span>
-                                <span className="text-xs font-bold text-navy-500">
-                                    +120 XP
-                                </span>
-                            </div>
-                            <blockquote className="mt-4 text-sm font-normal text-navy-950 leading-relaxed border-l-2 border-brand-primary pl-3">
-                                "죄송해요 팀장님, 어젯밤 갑자기 집에 정전이 나서
-                                알람이 다 꺼졌더라고요..."
-                            </blockquote>
-
-                            <dl className="mt-5 grid grid-cols-3 gap-3 text-center">
-                                {[
-                                    [
-                                        "성공 확률",
-                                        "82%",
-                                        "",
-                                        "text-brand-primary",
-                                    ],
-                                    [
-                                        "현실성",
-                                        "4 / 5",
-                                        "",
-                                        "text-brand-primary",
-                                    ],
-                                    [
-                                        "의심 위험도",
-                                        "MEDIUM",
-                                        "",
-                                        "text-suspicion-medium-text",
-                                    ],
-                                ].map(([label, value, bg, text]) => (
-                                    <div
-                                        key={label}
-                                        className={`py-3 ${bg}`}
-                                    >
-                                        <dt className="text-[11px] font-normal text-navy-500 order-2 mt-0.5">
-                                            {label}
-                                        </dt>
-                                        <dd
-                                            className={`text-lg font-bold ${text} order-1`}
-                                        >
-                                            {value}
-                                        </dd>
-                                    </div>
-                                ))}
-                            </dl>
-
-                            <div className="mt-5 pt-4 border-t border-border-soft">
-                                <p className="text-xs font-medium text-navy-500">
-                                    후폭풍 · 3일 뒤
-                                </p>
-                                <div className="mt-2 flex items-center justify-between">
-                                    <p className="text-sm font-normal text-navy-950">
-                                        "그때 정전 문제는 잘 해결됐어?"
-                                    </p>
-                                    <span className="text-xs font-bold text-brand-primary shrink-0 ml-3">
-                                        붕괴 72%
+                        <ol className="grid w-full max-w-xl gap-3 sm:grid-cols-2 lg:ml-auto">
+                            {[
+                                ["상황·관계 분석", "입력한 상황과 상대의 관계를 먼저 파악해요."],
+                                ["메시지 생성", "분석 결과에 맞춰 필요한 문장을 만들어요."],
+                                ["길이·사실 검사", "문장 길이와 앞뒤 사실이 맞는지 확인해요."],
+                                ["후속 대응 준비", "예상 질문과 다음 답변까지 함께 준비해요."],
+                            ].map(([title, description], index) => (
+                                <li key={title} className="rounded-2xl border border-border-soft bg-white p-6">
+                                    <span className="text-sm font-bold text-brand-primary">
+                                        {index + 1}
                                     </span>
-                                </div>
-                                <div className="mt-2 h-2 bg-border-soft rounded-md overflow-hidden">
-                                    <div className="h-full bg-brand-primary w-[72%]" />
-                                </div>
-                            </div>
-                        </article>
+                                    <h3 className="mt-2 font-bold text-navy-950">{title}</h3>
+                                    <p className="mt-1 text-sm leading-relaxed text-navy-500">
+                                        {description}
+                                    </p>
+                                </li>
+                            ))}
+                        </ol>
                     </div>
                 </section>
 

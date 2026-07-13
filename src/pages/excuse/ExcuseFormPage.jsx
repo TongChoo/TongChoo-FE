@@ -210,7 +210,6 @@ export default function ExcuseFormPage() {
               required
               maxLength={500}
               rows={12}
-              placeholder="예: 팀 프로젝트 회의에 늦잠 자서 못 갔다"
               value={situation}
               onChange={(event) => {
                 setSituation(event.target.value);
@@ -232,9 +231,6 @@ export default function ExcuseFormPage() {
           <section className="bg-white border border-border-soft rounded-2xl">
             <div className="p-8 sm:p-9">
               <h2 className="text-xl font-bold text-navy-950">누구에게, 얼마나 뻔뻔하게?</h2>
-              <p className="mt-1 text-sm font-normal text-navy-300">
-                예: 팀장에게는 능글맞은맛으로
-              </p>
               <div className="mt-6 flex flex-col gap-5">
                 <div>
                   <span className="flex items-center gap-1.5 text-xs font-medium text-navy-500">
@@ -273,7 +269,6 @@ export default function ExcuseFormPage() {
                         type="text"
                         required
                         maxLength={100}
-                        placeholder="예: 같은 프로젝트를 진행하는 친한 선배"
                         value={targetDescription}
                         onChange={(event) => {
                           setTargetDescription(event.target.value);

@@ -5,6 +5,10 @@ import CopyTextButton from "../../components/excuse/CopyTextButton";
 import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
 import { formatAftermathWhen } from "../../utils/aftermath";
+import {
+    excuseTextWrappingClass,
+    getExcuseTextSizeClass,
+} from "../../utils/excuseTypography";
 
 const targetLabels = {
     TEACHER: "선생님",
@@ -256,7 +260,7 @@ export default function ExcuseDetailPage() {
                     </span>
                 </div>
                 <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <blockquote className="text-xl sm:text-2xl font-medium text-navy-950 leading-snug border-l-4 border-brand-primary pl-4 sm:pl-5">
+                    <blockquote className={`flex-1 font-medium text-navy-950 leading-snug border-l-4 border-brand-primary pl-4 sm:pl-5 ${excuseTextWrappingClass} ${getExcuseTextSizeClass(excuse.excuse)}`}>
                         "{excuse.excuse}"
                     </blockquote>
                     <CopyTextButton

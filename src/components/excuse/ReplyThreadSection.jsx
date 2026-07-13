@@ -3,6 +3,10 @@ import { excuseApi } from "../../api/excuseApi";
 import ComplexityWarningNotice from "../common/ComplexityWarningNotice";
 import CopyTextButton from "./CopyTextButton";
 import { getComplexityWarningMessage } from "../../utils/complexityWarning";
+import {
+    excuseTextWrappingClass,
+    getExcuseTextSizeClass,
+} from "../../utils/excuseTypography";
 
 const MAX_ROUND = 5;
 
@@ -268,7 +272,7 @@ export default function ReplyThreadSection({
                             </p>
                         )}
                         {!shouldShowOptions && (
-                            <p className="mt-3 text-lg font-medium text-navy-900 leading-relaxed">
+                            <p className={`mt-3 font-medium text-navy-900 leading-relaxed ${excuseTextWrappingClass} ${getExcuseTextSizeClass(item.excuseText, "compact")}`}>
                                 "{item.excuseText}"
                             </p>
                         )}
@@ -332,7 +336,9 @@ export default function ReplyThreadSection({
                                                                 : "font-normal text-navy-700",
                                                         ].join(" ")}
                                                     >
-                                                        <span className="block">"{option}"</span>
+                                                        <span className={`block leading-relaxed ${excuseTextWrappingClass} ${getExcuseTextSizeClass(option, "compact")}`}>
+                                                            "{option}"
+                                                        </span>
                                                     </span>
                                                 </label>
                                                 <CopyTextButton
@@ -379,7 +385,6 @@ export default function ReplyThreadSection({
                             id={`incoming-message-${excuse.id}`}
                             maxLength={500}
                             rows={4}
-                            placeholder="예: 진짜? 정전 안내 문자 좀 보여줘봐"
                             value={incomingMessage}
                             onChange={(event) => {
                                 setIncomingMessage(event.target.value);
