@@ -64,5 +64,4 @@ export const apiClient = {
     get: (path, config) => httpClient.get(path, config),
     post: (path, body, config) => httpClient.post(path, body, config),
     patch: (path, body, config) => httpClient.patch(path, body, config),
-    delete: (path, config) => httpClient.delete(path, config),
 };

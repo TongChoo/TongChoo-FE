@@ -20,7 +20,6 @@ function buildInitialThread(excuse) {
             excuseText: excuse.excuse,
             replyOptions,
             selectedOptionIndex: 0,
-            regenerated: false,
         },
     ];
 }
@@ -105,7 +104,6 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                     excuseText: replyOptions[0] ?? nextReply.excuse,
                     replyOptions,
                     selectedOptionIndex: 0,
-                    regenerated: false,
                 },
             ]);
             setIncomingMessage("");

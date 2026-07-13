@@ -89,11 +89,8 @@ export default function ExcuseHistoryPage() {
                 setExcusePage({
                     content: data.content ?? [],
                     pageNumber: data.pageNumber ?? page,
-                    pageSize: data.pageSize ?? 3,
                     totalElements: data.totalElements ?? 0,
                     totalPages: data.totalPages ?? 1,
-                    first: data.first ?? page === 0,
-                    last: data.last ?? true,
                 });
             } catch (error) {
                 if (isMounted) {

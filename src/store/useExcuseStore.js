@@ -22,9 +22,4 @@ export const useExcuseStore = create((set) => ({
       return null;
     }
   },
-
-  clearLatestExcuse: () => {
-    sessionStorage.removeItem("latestExcuse");
-    set({ latestExcuse: null });
-  },
 }));
