@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { excuseApi } from "../../api/excuseApi";
-import ComplexityWarningModal from "../common/ComplexityWarningModal";
+import ComplexityWarningNotice from "../common/ComplexityWarningNotice";
 import CopyTextButton from "./CopyTextButton";
 import { getComplexityWarningMessage } from "../../utils/complexityWarning";
 
@@ -16,7 +16,6 @@ function buildInitialThread(excuse) {
             const isLatest = index === savedThread.length - 1;
             const typeLabels = {
                 ORIGINAL: "원본",
-                EVOLVE: "진화",
                 REPLY: "답장",
             };
             const replyOptions =
@@ -31,7 +30,10 @@ function buildInitialThread(excuse) {
                 incomingMessage: item.incomingMessage,
                 excuseText: item.excuse,
                 replyOptions,
-                selectedOptionIndex: 0,
+                selectedOptionIndex:
+                    isLatest && item.type === "REPLY"
+                        ? excuse.selectedOptionIndex ?? 0
+                        : 0,
             };
         });
     }
@@ -44,16 +46,18 @@ function buildInitialThread(excuse) {
             incomingMessage: excuse.incomingMessage,
             excuseText: excuse.excuse,
             replyOptions: normalizeReplyOptions(excuse),
-            selectedOptionIndex: 0,
+            selectedOptionIndex: excuse.selectedOptionIndex ?? 0,
         },
     ];
 }
 
 function normalizeReplyOptions(excuse) {
-    const candidates = [
-        excuse?.excuse,
-        ...(Array.isArray(excuse?.replyOptions) ? excuse.replyOptions : []),
-    ];
+    const savedOptions = Array.isArray(excuse?.replyOptions)
+        ? excuse.replyOptions
+        : [];
+    const candidates = savedOptions.length > 0
+        ? savedOptions
+        : [excuse?.excuse];
 
     return candidates.reduce((options, option) => {
         const trimmedOption = typeof option === "string" ? option.trim() : "";
@@ -80,7 +84,11 @@ function OptionCheckIcon() {
     );
 }
 
-export default function ReplyThreadSection({ excuse, onReplySuccess }) {
+export default function ReplyThreadSection({
+    excuse,
+    onReplySuccess,
+    onSelectionSuccess,
+}) {
     const [thread, setThread] = useState(() => buildInitialThread(excuse));
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [incomingMessage, setIncomingMessage] = useState("");
@@ -88,13 +96,7 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
     const [isServerRoundLimitReached, setIsServerRoundLimitReached] =
         useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isWarningModalOpen, setIsWarningModalOpen] = useState(() =>
-        Boolean(
-            excuse?.incomingMessage &&
-            excuse?.complexityWarning?.enabled &&
-            excuse?.complexityWarning?.message
-        )
-    );
+    const [isSavingSelection, setIsSavingSelection] = useState(false);
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -155,7 +157,10 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
             setIsFormOpen(false);
             onReplySuccess?.(nextReply);
         } catch (error) {
-            if (error.status === 409) {
+            if (
+                error.status === 409 &&
+                error.message?.includes("최대 5라운드")
+            ) {
                 setIsFormOpen(false);
                 setIsServerRoundLimitReached(true);
                 setReplyError("");
@@ -170,7 +175,19 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
         }
     }
 
-    function handleSelectReplyOption(threadIndex, optionIndex) {
+    async function handleSelectReplyOption(threadIndex, optionIndex) {
+        const item = thread[threadIndex];
+        const selectedExcuse = item?.replyOptions?.[optionIndex];
+        if (
+            !item ||
+            !selectedExcuse ||
+            optionIndex === item.selectedOptionIndex ||
+            isSavingSelection
+        ) {
+            return;
+        }
+
+        const previousOptionIndex = item.selectedOptionIndex;
         setThread((prev) =>
             prev.map((item, index) => {
                 if (index !== threadIndex) return item;
@@ -182,6 +199,38 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                 };
             })
         );
+
+        try {
+            setIsSavingSelection(true);
+            setReplyError("");
+            const saved = await excuseApi.selectReplyOption({
+                excuseId: item.id,
+                selectedExcuse,
+            });
+            onSelectionSuccess?.({
+                ...saved,
+                situation: saved.situation ?? excuse.situation,
+            });
+        } catch (error) {
+            setThread((prev) =>
+                prev.map((threadItem, index) =>
+                    index === threadIndex
+                        ? {
+                            ...threadItem,
+                            selectedOptionIndex: previousOptionIndex,
+                            excuseText:
+                                threadItem.replyOptions?.[previousOptionIndex] ??
+                                threadItem.excuseText,
+                        }
+                        : threadItem
+                )
+            );
+            setReplyError(
+                error.message || "선택한 답장을 저장하지 못했습니다."
+            );
+        } finally {
+            setIsSavingSelection(false);
+        }
     }
 
     return (
@@ -240,55 +289,52 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                                         return (
                                             <div
                                                 key={`${item.id}-${option}`}
-                                                role="button"
-                                                tabIndex={0}
-                                                onClick={() =>
-                                                    handleSelectReplyOption(
-                                                        threadIndex,
-                                                        optionIndex
-                                                    )
-                                                }
-                                                onKeyDown={(event) => {
-                                                    if (
-                                                        event.key === "Enter" ||
-                                                        event.key === " "
-                                                    ) {
-                                                        event.preventDefault();
-                                                        handleSelectReplyOption(
-                                                            threadIndex,
-                                                            optionIndex
-                                                        );
-                                                    }
-                                                }}
                                                 className={[
                                                     "w-full flex items-start gap-3 rounded-md border p-4 sm:p-5 text-left text-base cursor-pointer transition-colors",
                                                     isSelected
                                                         ? "border-brand-primary bg-brand-primary-soft"
                                                         : "border-border-soft bg-white hover:border-[#bedafd]",
                                                 ].join(" ")}
-                                                aria-pressed={isSelected}
                                             >
-                                                <span
-                                                    className={[
-                                                        "mt-0.5 w-5 h-5 rounded-full border shrink-0 flex items-center justify-center",
-                                                        isSelected
-                                                            ? "border-brand-primary bg-brand-primary"
-                                                            : "border-border-input bg-white",
-                                                    ].join(" ")}
-                                                    aria-hidden="true"
+                                                <label
+                                                    className="flex flex-1 min-w-0 items-start gap-3 cursor-pointer"
                                                 >
-                                                    {isSelected && <OptionCheckIcon />}
-                                                </span>
-                                                <span
-                                                    className={[
-                                                        "flex-1 min-w-0",
-                                                        isSelected
-                                                            ? "font-medium text-navy-950"
-                                                            : "font-normal text-navy-700",
-                                                    ].join(" ")}
-                                                >
-                                                    <span className="block">"{option}"</span>
-                                                </span>
+                                                    <input
+                                                        type="radio"
+                                                        name={`reply-option-${item.id}`}
+                                                        value={option}
+                                                        checked={isSelected}
+                                                        disabled={isSavingSelection}
+                                                        onChange={() =>
+                                                            handleSelectReplyOption(
+                                                                threadIndex,
+                                                                optionIndex
+                                                            )
+                                                        }
+                                                        className="sr-only"
+                                                    />
+                                                    <span
+                                                        className={[
+                                                            "mt-0.5 w-5 h-5 rounded-full border shrink-0 flex items-center justify-center",
+                                                            isSelected
+                                                                ? "border-brand-primary bg-brand-primary"
+                                                                : "border-border-input bg-white",
+                                                        ].join(" ")}
+                                                        aria-hidden="true"
+                                                    >
+                                                        {isSelected && <OptionCheckIcon />}
+                                                    </span>
+                                                    <span
+                                                        className={[
+                                                            "flex-1 min-w-0",
+                                                            isSelected
+                                                                ? "font-medium text-navy-950"
+                                                                : "font-normal text-navy-700",
+                                                        ].join(" ")}
+                                                    >
+                                                        <span className="block">"{option}"</span>
+                                                    </span>
+                                                </label>
                                                 <CopyTextButton
                                                     text={option}
                                                     label="이 답장 복사"
@@ -383,28 +429,13 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                 </p>
             )}
 
-            {hasComplexityWarning && !isWarningModalOpen && (
-                <button
-                    type="button"
-                    onClick={() => setIsWarningModalOpen(true)}
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-danger-text hover:text-[#c8342f] transition-colors"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        className="h-4 w-4 shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0Z" />
-                        <path d="M12 9v4" />
-                        <path d="M12 17h.01" />
-                    </svg>
-                    대화 충돌 경고 다시 보기
-                </button>
+            {hasComplexityWarning && (
+                <ComplexityWarningNotice
+                    className="mt-5"
+                    message={getComplexityWarningMessage(
+                        excuse?.complexityWarning?.message
+                    )}
+                />
             )}
 
             {isRoundLimitReached && (
@@ -413,15 +444,6 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                     없습니다.
                 </p>
             )}
-
-            <ComplexityWarningModal
-                isOpen={hasComplexityWarning && isWarningModalOpen}
-                onClose={() => setIsWarningModalOpen(false)}
-                title="이전 답변을 확인해 주세요"
-                message={getComplexityWarningMessage(
-                    excuse?.complexityWarning?.message
-                )}
-            />
         </section>
     );
 }

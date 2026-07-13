@@ -7,15 +7,17 @@ export const excuseApi = {
   getExcuse: (excuseId) =>
     apiClient.get(`/api/excuses/${excuseId}`),
 
-  createExcuse: ({ situation, target, tone }) =>
-    apiClient.post("/api/excuses", { situation, target, tone }),
-
-  evolveExcuse: ({ excuseId, direction }) =>
-    apiClient.post(`/api/excuses/${excuseId}/evolve`, { direction }),
+  createExcuse: ({ situation, target, targetDescription, tone }) =>
+    apiClient.post("/api/excuses", { situation, target, targetDescription, tone }),
 
   replyToExcuse: ({ excuseId, incomingMessage, currentExcuse }) =>
     apiClient.post(`/api/excuses/${excuseId}/reply`, {
       incomingMessage,
       currentExcuse,
+    }),
+
+  selectReplyOption: ({ excuseId, selectedExcuse }) =>
+    apiClient.patch(`/api/excuses/${excuseId}/selection`, {
+      selectedExcuse,
     }),
 };

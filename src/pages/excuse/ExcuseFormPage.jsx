@@ -11,6 +11,7 @@ const fallbackTargets = [
   { code: "LOVER", label: "연인" },
   { code: "TEAM_LEAD", label: "팀장" },
   { code: "TEAM_MEMBER", label: "팀원" },
+  { code: "CUSTOM", label: "기타 (직접 입력)" },
 ];
 
 const fallbackTones = [
@@ -86,6 +87,7 @@ function OptionDropdown({ placeholder, value, options, onChange }) {
 export default function ExcuseFormPage() {
   const [situation, setSituation] = useState("");
   const [target, setTarget] = useState("");
+  const [targetDescription, setTargetDescription] = useState("");
   const [tone, setTone] = useState("");
   const [targets, setTargets] = useState(fallbackTargets);
   const [tones, setTones] = useState(fallbackTones);
@@ -134,11 +136,14 @@ export default function ExcuseFormPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!situation.trim() || !target || !tone) {
+    const isCustomTargetMissing = target === "CUSTOM" && !targetDescription.trim();
+
+    if (!situation.trim() || !target || !tone || isCustomTargetMissing) {
       setErrorMessage("위기 상황과 상대, 강도를 모두 입력해주세요.");
       setFieldErrors({
         situation: !situation.trim() ? "위기 상황을 입력해주세요." : "",
         target: !target ? "변명 상대를 선택해주세요." : "",
+        targetDescription: isCustomTargetMissing ? "상대방을 직접 입력해주세요." : "",
         tone: !tone ? "변명 강도를 선택해주세요." : "",
       });
       return;
@@ -152,6 +157,7 @@ export default function ExcuseFormPage() {
       const excuse = await excuseApi.createExcuse({
         situation: situation.trim(),
         target,
+        targetDescription: target === "CUSTOM" ? targetDescription.trim() : null,
         tone,
       });
 
@@ -245,8 +251,9 @@ export default function ExcuseFormPage() {
                       options={targets}
                       onChange={(value) => {
                         setTarget(value);
+                        if (value !== "CUSTOM") setTargetDescription("");
                         setErrorMessage("");
-                        setFieldErrors((prev) => ({ ...prev, target: "" }));
+                        setFieldErrors((prev) => ({ ...prev, target: "", targetDescription: "" }));
                       }}
                     />
                   </div>
@@ -254,6 +261,36 @@ export default function ExcuseFormPage() {
                     <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
                       {fieldErrors.target}
                     </p>
+                  )}
+                  {target === "CUSTOM" && (
+                    <div className="mt-3">
+                      <label htmlFor="targetDescription" className="block text-xs font-medium text-navy-500">
+                        상대방을 직접 입력해주세요
+                      </label>
+                      <input
+                        id="targetDescription"
+                        name="targetDescription"
+                        type="text"
+                        required
+                        maxLength={100}
+                        placeholder="예: 같은 프로젝트를 진행하는 친한 선배"
+                        value={targetDescription}
+                        onChange={(event) => {
+                          setTargetDescription(event.target.value);
+                          setErrorMessage("");
+                          setFieldErrors((prev) => ({ ...prev, targetDescription: "" }));
+                        }}
+                        className="mt-1.5 w-full rounded-md border border-border-input bg-white px-3.5 py-2.5 text-sm text-navy-900 placeholder:text-[#a3b2c7] focus:outline-none focus:border-brand-primary transition"
+                      />
+                      <span className="mt-1 block text-right text-xs font-normal text-navy-300">
+                        {targetDescription.length}/100
+                      </span>
+                      {fieldErrors.targetDescription && (
+                        <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                          {fieldErrors.targetDescription}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div>

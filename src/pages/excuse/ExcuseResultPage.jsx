@@ -1,12 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { excuseApi } from "../../api/excuseApi";
-import Dropdown from "../../components/common/Dropdown";
-import ComplexityWarningModal from "../../components/common/ComplexityWarningModal";
 import CopyTextButton from "../../components/excuse/CopyTextButton";
 import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
-import { getComplexityWarningMessage } from "../../utils/complexityWarning";
+import { formatAftermathWhen } from "../../utils/aftermath";
 
 const targetLabels = {
   TEACHER: "선생님",
@@ -15,6 +12,7 @@ const targetLabels = {
   LOVER: "연인",
   TEAM_LEAD: "팀장",
   TEAM_MEMBER: "팀원",
+  CUSTOM: "기타",
 };
 
 const toneLabels = {
@@ -29,14 +27,6 @@ const suspicionClassNames = {
   MEDIUM: "text-suspicion-medium-text",
   HIGH: "text-suspicion-high-text",
 };
-
-const evolveOptions = [
-  { code: "MORE_PLAUSIBLE", label: "더 그럴듯하게" },
-  { code: "MORE_EMOTIONAL", label: "더 감성적으로" },
-  { code: "SHORTER", label: "더 짧게" },
-  { code: "DODGE_BLAME", label: "책임 회피" },
-  { code: "MORE_SHAMELESS", label: "더 뻔뻔하게" },
-];
 
 function formatDateTime(value) {
   if (!value) return "방금 전";
@@ -100,9 +90,9 @@ function AftermathTimeline({ aftermath }) {
       </thead>
       <tbody>
         {aftermath.map((item) => (
-          <tr key={`${item.when}-${item.question}`} className="border-t border-border-soft">
+          <tr key={`${item.when}-${item.question}`}>
             <td className="py-3 pr-3 align-top text-xs font-bold text-brand-primary whitespace-nowrap">
-              {item.when}
+              {formatAftermathWhen(item.when, item.dayOffset)}
             </td>
             <td className="py-3 pr-3 align-top text-sm font-normal text-navy-900">
               "{item.question}"
@@ -133,9 +123,6 @@ export default function ExcuseResultPage() {
   const getStoredLatestExcuse = useExcuseStore((state) => state.getStoredLatestExcuse);
   const setLatestExcuse = useExcuseStore((state) => state.setLatestExcuse);
   const [notice, setNotice] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState("");
-  const [evolveError, setEvolveError] = useState("");
-  const [isEvolving, setIsEvolving] = useState(false);
 
   // Zustand 상태는 새로고침하면 비어질 수 있다.
   // 그래서 /create에서 같이 저장해둔 sessionStorage 값을 한 번 더 읽어 결과를 복구한다.
@@ -144,14 +131,6 @@ export default function ExcuseResultPage() {
     [latestExcuse, getStoredLatestExcuse],
   );
   const [currentExcuse, setCurrentExcuse] = useState(initialExcuse);
-  const [isEvolveWarningModalOpen, setIsEvolveWarningModalOpen] = useState(() =>
-    Boolean(
-      initialExcuse &&
-      !initialExcuse.incomingMessage &&
-      initialExcuse.complexityWarning?.enabled &&
-      initialExcuse.complexityWarning?.message
-    ),
-  );
   const excuse = currentExcuse;
 
   if (!excuse) {
@@ -173,58 +152,12 @@ export default function ExcuseResultPage() {
   }
 
   const analysis = excuse.analysis ?? {};
-  const targetLabel = targetLabels[excuse.target] ?? excuse.target;
+  const targetLabel = excuse.target === "CUSTOM"
+    ? excuse.targetDescription || targetLabels.CUSTOM
+    : targetLabels[excuse.target] ?? excuse.target;
   const toneLabel = toneLabels[excuse.tone] ?? excuse.tone;
   const suspicionLevel = analysis.suspicionLevel ?? "MEDIUM";
   const roundNumber = excuse.roundNumber ?? 1;
-  const hasEvolveComplexityWarning = Boolean(
-    !excuse.incomingMessage &&
-    excuse.complexityWarning?.enabled &&
-    excuse.complexityWarning?.message
-  );
-
-  async function handleEvolveSubmit(event) {
-    event.preventDefault();
-
-    if (!selectedDirection) {
-      setEvolveError("어떤 방향으로 바꿀지 선택해주세요.");
-      return;
-    }
-
-    try {
-      setIsEvolving(true);
-      setNotice("");
-      setEvolveError("");
-
-      const evolvedExcuse = await excuseApi.evolveExcuse({
-        excuseId: excuse.id,
-        direction: selectedDirection,
-      });
-
-      // 백엔드의 진화 응답에는 원본 입력 상황이 없을 수 있다.
-      // 화면 상단의 "상황" 표시를 유지하려고 기존 situation을 새 결과에 같이 붙인다.
-      const nextExcuse = {
-        ...evolvedExcuse,
-        situation: excuse.situation,
-      };
-
-      setCurrentExcuse(nextExcuse);
-      setLatestExcuse(nextExcuse);
-      setSelectedDirection("");
-      setIsEvolveWarningModalOpen(
-        Boolean(
-          !nextExcuse.incomingMessage &&
-          nextExcuse.complexityWarning?.enabled &&
-          nextExcuse.complexityWarning?.message
-        ),
-      );
-    } catch (error) {
-      setEvolveError(error.message || "변명 진화에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setIsEvolving(false);
-    }
-  }
-
   return (
     <main className="max-w-7xl mx-auto px-6 py-12 bg-white">
       <Link to="/create" className="inline-flex items-center gap-1.5 text-sm font-medium text-navy-500 hover:text-brand-primary transition-colors">
@@ -271,10 +204,9 @@ export default function ExcuseResultPage() {
         </div>
       </section>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 items-start">
-        <div className="border border-border-soft rounded-lg">
-          <div className="p-6 sm:p-8">
-            <h2 className="text-base font-bold text-navy-950">변명 분석 리포트</h2>
+      <section className="mt-6 px-0 py-6 sm:py-8" aria-labelledby="analysis-report-title">
+          <div>
+            <h2 id="analysis-report-title" className="text-base font-bold text-navy-950">변명 분석 리포트</h2>
 
             <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <MetricCard label="성공(생존) 확률">{analysis.successRate ?? 0}%</MetricCard>
@@ -290,97 +222,35 @@ export default function ExcuseResultPage() {
               </div>
             </dl>
 
-            <h3 className="mt-6 text-sm font-bold text-navy-700">위험 요소</h3>
-            <div className="mt-2">
-              <BulletList
-                items={analysis.riskFactors}
-                color="bg-danger-text"
-                emptyText="특별히 감지된 위험 요소가 없어요."
-              />
+            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-bold text-navy-700">위험 요소</h3>
+                <div className="mt-2">
+                  <BulletList
+                    items={analysis.riskFactors}
+                    color="bg-danger-text"
+                    emptyText="특별히 감지된 위험 요소가 없어요."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-navy-700">기억해야 할 설정</h3>
+                <div className="mt-2">
+                  <BulletList
+                    items={excuse.remember}
+                    emptyText="아직 기억할 설정이 없어요."
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 border-t border-border-soft">
+          <div className="mt-8">
             <h2 className="text-base font-bold text-navy-950">후폭풍 타임라인</h2>
             <AftermathTimeline aftermath={excuse.aftermath} />
           </div>
-        </div>
-
-        <div className="border border-border-soft rounded-lg">
-          <div className="p-6 sm:p-8">
-            <h2 className="text-base font-bold text-navy-950">기억해야 할 설정</h2>
-            <div className="mt-3">
-              <BulletList
-                items={excuse.remember}
-                emptyText="아직 기억할 설정이 없어요."
-              />
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-8 border-t border-border-soft">
-            <h2 className="text-base font-bold text-navy-950">변명 진화</h2>
-            <p className="mt-2 text-sm font-normal text-navy-500">
-              같은 변명을 더 그럴듯하게, 더 짧게, 더 뻔뻔하게 바꾸는 기능이에요.
-            </p>
-            <form onSubmit={handleEvolveSubmit} className="mt-4 flex flex-col gap-3">
-              <Dropdown
-                label="진화 방향"
-                placeholder="선택하세요"
-                value={selectedDirection}
-                options={evolveOptions}
-                onChange={(value) => {
-                  setSelectedDirection(value);
-                  setEvolveError("");
-                }}
-              />
-
-              <button
-                type="submit"
-                disabled={isEvolving}
-                className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isEvolving && (
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-90" d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                  </svg>
-                )}
-                {isEvolving ? "진화시키는 중..." : "진화시키기"}
-              </button>
-
-              {evolveError && (
-                <p role="alert" className="text-sm font-medium text-danger-text">
-                  {evolveError}
-                </p>
-              )}
-            </form>
-
-            {hasEvolveComplexityWarning && !isEvolveWarningModalOpen && (
-              <button
-                type="button"
-                onClick={() => setIsEvolveWarningModalOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-danger-text hover:text-[#c8342f] transition-colors"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0Z" />
-                  <path d="M12 9v4" />
-                  <path d="M12 17h.01" />
-                </svg>
-                설정 충돌 경고 다시 보기
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      </section>
 
       <ReplyThreadSection
         key={excuse.id}
@@ -390,13 +260,11 @@ export default function ExcuseResultPage() {
           setLatestExcuse(replyResult);
           setNotice("상대방 답장에 이어지는 다음 변명을 준비했어요.");
         }}
-      />
-
-      <ComplexityWarningModal
-        isOpen={hasEvolveComplexityWarning && isEvolveWarningModalOpen}
-        onClose={() => setIsEvolveWarningModalOpen(false)}
-        title="원본 변명을 확인해 주세요"
-        message={getComplexityWarningMessage(excuse.complexityWarning?.message)}
+        onSelectionSuccess={(selectionResult) => {
+          setCurrentExcuse(selectionResult);
+          setLatestExcuse(selectionResult);
+          setNotice("선택한 답장을 저장했어요.");
+        }}
       />
     </main>
   );

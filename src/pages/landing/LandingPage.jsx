@@ -270,7 +270,7 @@ export default function LandingPage() {
                                 {[
                                     "현실성 · 설득력 · 의심 위험도 점수 확인",
                                     "N일 뒤 예상 질문과 붕괴 확률 타임라인",
-                                    "변명이 마음에 안 들면 다른 방향으로 진화",
+                                    "상대 답장에 맞춘 후속 답변 후보 제공",
                                 ].map((item) => (
                                     <li
                                         key={item}

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { excuseApi } from "../../api/excuseApi";
-import Dropdown from "../../components/common/Dropdown";
 import CopyTextButton from "../../components/excuse/CopyTextButton";
 import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
+import { formatAftermathWhen } from "../../utils/aftermath";
 
 const targetLabels = {
     TEACHER: "선생님",
@@ -13,6 +13,7 @@ const targetLabels = {
     LOVER: "연인",
     TEAM_LEAD: "팀장",
     TEAM_MEMBER: "팀원",
+    CUSTOM: "기타",
 };
 
 const toneLabels = {
@@ -27,14 +28,6 @@ const suspicionClassNames = {
     MEDIUM: "text-suspicion-medium-text",
     HIGH: "text-suspicion-high-text",
 };
-
-const evolveOptions = [
-    { code: "MORE_PLAUSIBLE", label: "더 그럴듯하게" },
-    { code: "MORE_EMOTIONAL", label: "더 감성적으로" },
-    { code: "SHORTER", label: "더 짧게" },
-    { code: "DODGE_BLAME", label: "책임 회피" },
-    { code: "MORE_SHAMELESS", label: "더 뻔뻔하게" },
-];
 
 function formatDateTime(value) {
     if (!value) return "-";
@@ -117,10 +110,9 @@ function AftermathTimeline({ aftermath }) {
                 {aftermath.map((item) => (
                     <tr
                         key={`${item.when}-${item.question}`}
-                        className="border-t border-border-soft"
                     >
                         <td className="py-3 pr-3 align-top text-xs font-bold text-brand-primary whitespace-nowrap">
-                            {item.when}
+                            {formatAftermathWhen(item.when, item.dayOffset)}
                         </td>
                         <td className="py-3 pr-3 align-top text-sm font-normal text-navy-900">
                             "{item.question}"
@@ -153,15 +145,11 @@ function AftermathTimeline({ aftermath }) {
 
 export default function ExcuseDetailPage() {
     const { excuseId } = useParams();
-    const navigate = useNavigate();
     const setLatestExcuse = useExcuseStore((state) => state.setLatestExcuse);
     const [excuse, setExcuse] = useState(null);
-    const [selectedDirection, setSelectedDirection] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const [isEvolving, setIsEvolving] = useState(false);
     const [notice, setNotice] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [evolveError, setEvolveError] = useState("");
 
     useEffect(() => {
         let isMounted = true;
@@ -190,38 +178,6 @@ export default function ExcuseDetailPage() {
             isMounted = false;
         };
     }, [excuseId]);
-
-    async function handleEvolveSubmit(event) {
-        event.preventDefault();
-
-        if (!selectedDirection) {
-            setEvolveError("어떤 방향으로 바꿀지 선택해주세요.");
-            return;
-        }
-
-        try {
-            setIsEvolving(true);
-            setEvolveError("");
-            setNotice("");
-
-            const evolvedExcuse = await excuseApi.evolveExcuse({
-                excuseId: excuse.id,
-                direction: selectedDirection,
-            });
-
-            const nextExcuse = {
-                ...evolvedExcuse,
-                situation: excuse.situation,
-            };
-
-            setLatestExcuse(nextExcuse);
-            navigate("/excuses/result");
-        } catch (error) {
-            setEvolveError(error.message || "변명 진화에 실패했습니다.");
-        } finally {
-            setIsEvolving(false);
-        }
-    }
 
     if (isLoading) {
         return (
@@ -254,7 +210,9 @@ export default function ExcuseDetailPage() {
 
     const analysis = excuse.analysis ?? {};
     const suspicionLevel = analysis.suspicionLevel ?? "MEDIUM";
-    const targetLabel = targetLabels[excuse.target] ?? excuse.target;
+    const targetLabel = excuse.target === "CUSTOM"
+        ? excuse.targetDescription || targetLabels.CUSTOM
+        : targetLabels[excuse.target] ?? excuse.target;
     const toneLabel = toneLabels[excuse.tone] ?? excuse.tone;
     const roundNumber = excuse.roundNumber ?? 1;
 
@@ -308,10 +266,9 @@ export default function ExcuseDetailPage() {
                 </div>
             </section>
 
-            <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 items-start">
-                <div className="border border-border-soft rounded-lg">
-                    <div className="p-6 sm:p-8">
-                        <h2 className="text-base font-bold text-navy-950">
+            <section className="mt-6 px-0 py-6 sm:py-8" aria-labelledby="analysis-report-title">
+                    <div>
+                        <h2 id="analysis-report-title" className="text-base font-bold text-navy-950">
                             변명 분석 리포트
                         </h2>
 
@@ -343,85 +300,42 @@ export default function ExcuseDetailPage() {
                             </div>
                         </dl>
 
-                        <h3 className="mt-6 text-sm font-bold text-navy-700">
-                            위험 요소
-                        </h3>
-                        <div className="mt-2">
-                            <DotList
-                                items={analysis.riskFactors}
-                                color="bg-suspicion-high-text"
-                                textColor="text-navy-500"
-                                emptyText="특별히 감지된 위험 요소가 없어요."
-                            />
+                        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+                            <div>
+                                <h3 className="text-sm font-bold text-navy-700">
+                                    위험 요소
+                                </h3>
+                                <div className="mt-2">
+                                    <DotList
+                                        items={analysis.riskFactors}
+                                        color="bg-suspicion-high-text"
+                                        textColor="text-navy-500"
+                                        emptyText="특별히 감지된 위험 요소가 없어요."
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-bold text-navy-700">
+                                    기억해야 할 설정
+                                </h3>
+                                <div className="mt-2">
+                                    <DotList
+                                        items={excuse.remember}
+                                        emptyText="아직 기억할 설정이 없어요."
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="p-6 sm:p-8 border-t border-border-soft">
+                    <div className="mt-8">
                         <h2 className="text-base font-bold text-navy-950">
                             후폭풍 타임라인
                         </h2>
                         <AftermathTimeline aftermath={excuse.aftermath} />
                     </div>
-                </div>
-
-                <div className="border border-border-soft rounded-lg">
-                    <div className="p-6 sm:p-8">
-                        <h2 className="text-base font-bold text-navy-950">
-                            기억해야 할 설정
-                        </h2>
-                        <div className="mt-3">
-                            <DotList
-                                items={excuse.remember}
-                                emptyText="아직 기억할 설정이 없어요."
-                            />
-                        </div>
-                    </div>
-
-                    <div className="p-6 sm:p-8 border-t border-border-soft">
-                        <h2 className="text-base font-bold text-navy-950">
-                            변명 진화
-                        </h2>
-                        <form
-                            onSubmit={handleEvolveSubmit}
-                            className="mt-3 flex flex-col gap-3"
-                        >
-                            <input
-                                type="hidden"
-                                name="excuseId"
-                                value={excuse.id}
-                            />
-
-                            <Dropdown
-                                label="어떤 방향으로 바꿔볼까요?"
-                                placeholder="선택하세요"
-                                value={selectedDirection}
-                                options={evolveOptions}
-                                onChange={(value) => {
-                                    setSelectedDirection(value);
-                                    setEvolveError("");
-                                }}
-                            />
-
-                            <button
-                                type="submit"
-                                disabled={isEvolving}
-                                className="px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {isEvolving ? "진화시키는 중..." : "진화시키기"}
-                            </button>
-
-                            {evolveError && (
-                                <p
-                                    role="alert"
-                                    className="text-sm font-medium text-danger-text"
-                                >
-                                    {evolveError}
-                                </p>
-                            )}
-                        </form>
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <ReplyThreadSection
                 key={excuse.id}
@@ -430,6 +344,11 @@ export default function ExcuseDetailPage() {
                     setExcuse(replyResult);
                     setLatestExcuse(replyResult);
                     setNotice("상대방 답장에 이어지는 다음 변명을 준비했어요.");
+                }}
+                onSelectionSuccess={(selectionResult) => {
+                    setExcuse(selectionResult);
+                    setLatestExcuse(selectionResult);
+                    setNotice("선택한 답장을 저장했어요.");
                 }}
             />
         </main>

@@ -11,6 +11,7 @@ const targetLabels = {
   LOVER: "연인",
   TEAM_LEAD: "팀장",
   TEAM_MEMBER: "팀원",
+  CUSTOM: "기타",
 };
 
 const toneLabels = {
@@ -185,25 +186,11 @@ export default function MyPagePage() {
             <p className="text-sm font-medium text-navy-500">마이페이지 정보를 불러오는 중...</p>
           ) : (
             <div className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left gap-4 sm:gap-5">
-              <div className="relative shrink-0">
+              <div className="shrink-0">
                 {/* docs/ui/mypage.html 기준: 기본 프로필은 인물 실루엣 SVG를 사용한다. */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#eef1f5] overflow-hidden flex items-center justify-center">
                   <DefaultAvatar />
                 </div>
-
-                {/* 프로필 사진 저장 API는 아직 없어서, HTML 디자인과 동일하게 파일 선택 UI까지만 둔다. */}
-                <label
-                  htmlFor="profile-photo-input"
-                  className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-primary text-white flex items-center justify-center ring-2 ring-white cursor-pointer hover:bg-brand-primary-hover transition-colors"
-                  aria-label="프로필 사진 변경"
-                  title="프로필 사진 저장은 추후 지원 예정입니다."
-                >
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 8h2l2-3h8l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                </label>
-                <input type="file" id="profile-photo-input" name="profileImage" accept="image/*" className="sr-only" />
               </div>
 
               <div>
@@ -366,7 +353,9 @@ export default function MyPagePage() {
                     <p className="text-sm font-normal text-navy-900 truncate">{excuse.situation}</p>
                     <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                       <span className="text-[11px] font-medium text-brand-primary whitespace-nowrap">
-                        {targetLabels[excuse.target] ?? excuse.target} · {toneLabels[excuse.tone] ?? excuse.tone}
+                        {excuse.target === "CUSTOM"
+                          ? excuse.targetDescription || targetLabels.CUSTOM
+                          : targetLabels[excuse.target] ?? excuse.target} · {toneLabels[excuse.tone] ?? excuse.tone}
                       </span>
                       <span className="text-xs font-normal text-navy-300 whitespace-nowrap">{formatDate(excuse.createdAt)}</span>
                     </div>

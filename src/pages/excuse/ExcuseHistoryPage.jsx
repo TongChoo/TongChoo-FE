@@ -10,6 +10,7 @@ const targetLabels = {
     LOVER: "연인",
     TEAM_LEAD: "팀장",
     TEAM_MEMBER: "팀원",
+    CUSTOM: "기타",
 };
 
 const toneLabels = {
@@ -291,8 +292,9 @@ export default function ExcuseHistoryPage() {
                                         </td>
                                         <td className="px-4 py-6">
                                             <span className="text-sm font-medium text-brand-primary whitespace-nowrap">
-                                                {targetLabels[excuse.target] ??
-                                                    excuse.target}{" "}
+                                                {excuse.target === "CUSTOM"
+                                                    ? excuse.targetDescription || targetLabels.CUSTOM
+                                                    : targetLabels[excuse.target] ?? excuse.target}{" "}
                                                 ·{" "}
                                                 {toneLabels[excuse.tone] ??
                                                     excuse.tone}
