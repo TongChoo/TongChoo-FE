@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { userApi } from "../../api/userApi";
 
 const gradeTiers = [
@@ -6,38 +6,44 @@ const gradeTiers = [
     code: "NOVICE",
     label: "초보 변명러",
     minXp: 0,
-    className: "bg-white ring-1 ring-border-ring text-navy-950 shadow-[0_4px_12px_rgba(11,42,85,0.035)]",
+    bg: "#ffffff",
+    text: "#0b2a55",
+    ring: true,
   },
   {
     code: "SURVIVOR",
     label: "위기 생존자",
     minXp: 200,
-    className: "bg-[#bedafd] text-navy-950 shadow-[0_4px_12px_rgba(21,126,251,0.07)]",
+    bg: "#bedafd",
+    text: "#0b2a55",
   },
   {
     code: "EXCUSE_EXPERT",
     label: "핑계 전문가",
     minXp: 500,
-    className: "bg-[#84bbf6] text-navy-950 shadow-[0_5px_13px_rgba(21,126,251,0.09)]",
+    bg: "#84bbf6",
+    text: "#0b2a55",
   },
   {
     code: "SOCIAL_MASTER",
     label: "사회생활 마스터",
     minXp: 900,
-    className: "bg-[#4c98ee] text-navy-950 shadow-[0_5px_14px_rgba(21,126,251,0.11)]",
+    bg: "#4c98ee",
+    text: "#0b2a55",
   },
   {
     code: "EXCUSE_GOD",
     label: "변명의 신",
     minXp: 1400,
-    className: "bg-brand-primary text-white shadow-[0_6px_16px_rgba(21,126,251,0.14)]",
+    bg: "#157EFB",
+    text: "#ffffff",
   },
 ];
 
-function TrophyIcon() {
+function TrophyIcon({ className = "w-8 h-8" }) {
   return (
     <svg
-      className="w-8 h-8"
+      className={className}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -52,22 +58,116 @@ function TrophyIcon() {
   );
 }
 
-function CheckBadge() {
+function CheckIcon() {
   return (
-    <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-suspicion-low-text text-white flex items-center justify-center ring-2 ring-white" aria-label="달성 완료">
-      <svg
-        viewBox="0 0 24 24"
-        className="w-3.5 h-3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M5 13l4 4L19 7" />
-      </svg>
-    </span>
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6 sm:w-7 sm:h-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6 sm:w-7 sm:h-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="4" y="11" width="16" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+function GradeNode({ tier, index, currentIndex, totalXp, nextTier }) {
+  const isAchieved = index < currentIndex;
+  const isCurrent = index === currentIndex;
+  const isLocked = index > currentIndex;
+  const nodeSizeClass = isCurrent
+    ? "w-16 h-16 sm:w-20 sm:h-20"
+    : "w-14 h-14 sm:w-16 sm:h-16";
+  const nodeRingClass = isCurrent
+    ? "ring-4 ring-brand-primary/25"
+    : tier.ring && !isLocked
+      ? "ring-1 ring-border-ring"
+      : "";
+  const nodeColor = {
+    backgroundColor: isLocked ? "#eef1f5" : tier.bg,
+    color: isLocked ? "#a9b4c4" : tier.text,
+  };
+
+  const labelColorClass = isCurrent
+    ? "text-brand-primary"
+    : isLocked
+      ? "text-[#a9b4c4]"
+      : "text-navy-950";
+  const caption = isAchieved
+    ? "달성 완료"
+    : isCurrent
+      ? nextTier
+        ? `다음 등급까지 ${Math.max(nextTier.minXp - totalXp, 0)} XP`
+        : "최고 등급"
+      : `앞으로 ${Math.max(tier.minXp - totalXp, 0)} XP`;
+
+  return (
+    <li className="flex flex-row sm:flex-1 sm:flex-col items-center gap-4 sm:gap-0">
+      <div className="flex items-center w-full">
+        {index > 0 && (
+          <span
+            className={[
+              "hidden sm:block flex-1 h-1 rounded-full",
+              index <= currentIndex ? "bg-brand-primary" : "bg-border-soft",
+            ].join(" ")}
+          />
+        )}
+
+        <div
+          className={[
+            "relative shrink-0 rounded-full flex items-center justify-center transition-all mx-auto",
+            nodeSizeClass,
+            nodeRingClass,
+          ].join(" ")}
+          style={nodeColor}
+          aria-hidden="true"
+        >
+          {isAchieved ? (
+            <CheckIcon />
+          ) : isLocked ? (
+            <LockIcon />
+          ) : (
+            <TrophyIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+          )}
+        </div>
+
+        {index < gradeTiers.length - 1 && (
+          <span
+            className={[
+              "hidden sm:block flex-1 h-1 rounded-full",
+              index < currentIndex ? "bg-brand-primary" : "bg-border-soft",
+            ].join(" ")}
+          />
+        )}
+      </div>
+
+      <div className="sm:mt-3 sm:text-center">
+        <p className={`text-sm font-bold ${labelColorClass}`}>{tier.label}</p>
+        <p className="mt-0.5 text-xs font-normal text-navy-300">{caption}</p>
+      </div>
+    </li>
   );
 }
 
@@ -102,11 +202,11 @@ export default function RankPage() {
     };
   }, []);
 
-  const currentIndex = useMemo(() => {
+  const currentIndex = (() => {
     if (!rank?.grade) return 0;
     const index = gradeTiers.findIndex((tier) => tier.code === rank.grade);
     return index >= 0 ? index : 0;
-  }, [rank?.grade]);
+  })();
 
   const currentTier = gradeTiers[currentIndex];
   const nextTier = gradeTiers[currentIndex + 1] ?? null;
@@ -136,7 +236,14 @@ export default function RankPage() {
             <>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 ${currentTier.className}`} aria-hidden="true">
+                  <div
+                    className={[
+                      "w-16 h-16 rounded-full flex items-center justify-center shrink-0",
+                      currentTier.ring ? "ring-1 ring-border-ring" : "",
+                    ].join(" ")}
+                    style={{ backgroundColor: currentTier.bg, color: currentTier.text }}
+                    aria-hidden="true"
+                  >
                     <TrophyIcon />
                   </div>
                   <div>
@@ -169,7 +276,7 @@ export default function RankPage() {
                   </div>
                   <p className="mt-2 text-sm font-normal text-navy-500">
                     <strong className="font-bold text-brand-primary">{xpToNext} XP</strong>만 더 모으면{" "}
-                    <strong className="font-bold text-navy-900">{rank?.nextGradeLabel ?? nextTier.label}</strong>예요.
+                    <strong className="font-bold text-navy-900">{rank?.nextGradeLabel ?? nextTier?.label}</strong>예요.
                   </p>
                 </div>
               )}
@@ -179,34 +286,17 @@ export default function RankPage() {
 
         <div className="p-6 sm:p-8 border-t border-border-soft">
           <h2 className="text-base font-bold text-navy-950">등급 체계</h2>
-          <ol className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {gradeTiers.map((tier, index) => {
-              const isCurrent = index === currentIndex;
-              const isAchieved = index < currentIndex;
-              const remainingXp = Math.max(tier.minXp - totalXp, 0);
-
-              return (
-                <li
-                  key={tier.code}
-                  className={[
-                    "relative rounded-2xl px-5 py-4 text-center",
-                    tier.className,
-                    isCurrent ? "ring-2 ring-brand-primary ring-offset-2" : "",
-                  ].join(" ")}
-                >
-                  {isAchieved && <CheckBadge />}
-                  <p className="text-base font-bold">{tier.label}</p>
-                  <p className={tier.code === "EXCUSE_GOD" ? "mt-1 text-xs font-normal text-white/80" : "mt-1 text-xs font-normal text-navy-500"}>
-                    {isAchieved ? `${tier.minXp} XP~` : remainingXp > 0 ? `앞으로 ${remainingXp} XP` : `${tier.minXp} XP~`}
-                  </p>
-                  {isCurrent && (
-                    <span className="mt-2 inline-block text-[10px] font-bold text-brand-primary">
-                      현재 등급
-                    </span>
-                  )}
-                </li>
-              );
-            })}
+          <ol className="mt-6 flex flex-col sm:flex-row gap-5 sm:gap-0">
+            {gradeTiers.map((tier, index) => (
+              <GradeNode
+                key={tier.code}
+                tier={tier}
+                index={index}
+                currentIndex={currentIndex}
+                totalXp={totalXp}
+                nextTier={nextTier}
+              />
+            ))}
           </ol>
         </div>
       </section>

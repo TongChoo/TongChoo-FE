@@ -31,17 +31,6 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
     const textareaRef = useRef(null);
 
     useEffect(() => {
-        setThread((prev) => {
-            if (prev.some((item) => item.id === excuse?.id)) return prev;
-            return buildInitialThread(excuse);
-        });
-        setIsFormOpen(false);
-        setIncomingMessage("");
-        setReplyError("");
-        setIsServerRoundLimitReached(false);
-    }, [excuse?.id]);
-
-    useEffect(() => {
         if (isFormOpen) textareaRef.current?.focus();
     }, [isFormOpen]);
 

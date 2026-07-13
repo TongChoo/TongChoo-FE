@@ -44,7 +44,7 @@ export default function AppHeader() {
                 </Link>
 
                 <nav
-                    className="hidden md:flex items-center justify-center gap-10 text-base font-bold text-navy-700"
+                    className="hidden md:flex items-center justify-center gap-14 text-base font-semibold text-navy-700"
                     aria-label="서비스 메뉴"
                 >
                     {NAV_ITEMS.map((item) => (
@@ -69,8 +69,8 @@ export default function AppHeader() {
                                 [
                                     "px-5 py-2.5 text-base font-bold rounded-md transition-colors",
                                     isActive
-                                        ? "text-brand-primary hover:bg-brand-primary-soft"
-                                        : "text-navy-950 hover:bg-brand-primary-soft hover:text-brand-primary",
+                                        ? "text-brand-primary"
+                                        : "text-navy-950 hover:text-brand-primary",
                                 ].join(" ")
                             }
                         >

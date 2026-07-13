@@ -337,6 +337,7 @@ export default function ExcuseResultPage() {
       </div>
 
       <ReplyThreadSection
+        key={excuse.id}
         excuse={excuse}
         onReplySuccess={(replyResult) => {
           setCurrentExcuse(replyResult);
