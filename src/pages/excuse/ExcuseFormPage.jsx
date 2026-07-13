@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { excuseApi } from "../../api/excuseApi";
+import { metaApi } from "../../api/metaApi";
+import { useExcuseStore } from "../../store/useExcuseStore";
 
 const fallbackTargets = [
   { code: "TEACHER", label: "선생님" },
@@ -86,11 +90,50 @@ export default function ExcuseFormPage() {
   const [situation, setSituation] = useState("");
   const [target, setTarget] = useState("");
   const [tone, setTone] = useState("");
+  const [targets, setTargets] = useState(fallbackTargets);
+  const [tones, setTones] = useState(fallbackTones);
   const [errorMessage, setErrorMessage] = useState("");
+  const [metaNotice, setMetaNotice] = useState("");
+  const [isLoadingMeta, setIsLoadingMeta] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const setLatestExcuse = useExcuseStore((state) => state.setLatestExcuse);
 
-  // 1단계 UI 구현에서는 실제 API 호출 대신 입력값 검증까지만 담당한다.
-  // 다음 커밋에서 /api/meta와 /api/excuses 연동을 붙이면서 이 submit 흐름을 실제 요청으로 교체한다.
-  function handleSubmit(event) {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMeta() {
+      try {
+        setIsLoadingMeta(true);
+        const meta = await metaApi.getMeta();
+
+        if (!isMounted) return;
+
+        setTargets(meta.targets?.length ? meta.targets : fallbackTargets);
+        setTones(meta.tones?.length ? meta.tones : fallbackTones);
+        setMetaNotice("");
+      } catch {
+        if (!isMounted) return;
+
+        // /api/meta는 선택지 목록을 가져오는 API다.
+        // 이 API가 잠깐 실패해도 사용자가 화면을 아예 못 쓰면 안 되므로,
+        // 프론트에 박아둔 기본 선택지를 대신 보여준다.
+        setTargets(fallbackTargets);
+        setTones(fallbackTones);
+        setMetaNotice("선택지 정보를 불러오지 못해서 기본 옵션으로 표시 중이에요.");
+      } finally {
+        if (isMounted) setIsLoadingMeta(false);
+      }
+    }
+
+    loadMeta();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!situation.trim() || !target || !tone) {
@@ -98,7 +141,25 @@ export default function ExcuseFormPage() {
       return;
     }
 
-    setErrorMessage("다음 단계에서 실제 변명 생성 API와 연결됩니다.");
+    try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+
+      const excuse = await excuseApi.createExcuse({
+        situation: situation.trim(),
+        target,
+        tone,
+      });
+
+      // 생성 결과는 바로 다음 화면에서 필요하다.
+      // 그래서 zustand + sessionStorage에 저장해 새로고침에도 한 번은 복구할 수 있게 한다.
+      setLatestExcuse(excuse);
+      navigate("/excuses/result");
+    } catch (error) {
+      setErrorMessage(error.message || "변명 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -107,6 +168,11 @@ export default function ExcuseFormPage() {
       <p className="mt-1.5 text-sm font-normal text-navy-500">
         위기 상황을 자세히 적어주시면, AI가 상대와 강도에 맞춰 변명을 만들고 성공 확률까지 계산해드려요.
       </p>
+      {metaNotice && (
+        <p role="status" className="mt-4 inline-block text-sm font-medium text-brand-primary bg-brand-primary-soft rounded-md px-3.5 py-2.5">
+          {metaNotice}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6">
         <section aria-label="위기 상황" className="border-2 border-[#bedafd] bg-brand-primary-soft/40 rounded-lg p-6 sm:p-8">
@@ -160,7 +226,7 @@ export default function ExcuseFormPage() {
               label="변명 상대"
               placeholder="선택하세요"
               value={target}
-              options={fallbackTargets}
+              options={targets}
               onChange={(value) => {
                 setTarget(value);
                 setErrorMessage("");
@@ -170,7 +236,7 @@ export default function ExcuseFormPage() {
               label="변명 강도"
               placeholder="선택하세요"
               value={tone}
-              options={fallbackTones}
+              options={tones}
               onChange={(value) => {
                 setTone(value);
                 setErrorMessage("");
@@ -182,9 +248,16 @@ export default function ExcuseFormPage() {
         <div className="mt-6 flex flex-col items-center gap-3">
           <button
             type="submit"
-            className="w-full sm:w-auto sm:min-w-[280px] flex items-center justify-center gap-2.5 px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all"
+            disabled={isLoadingMeta || isSubmitting}
+            className="w-full sm:w-auto sm:min-w-[280px] flex items-center justify-center gap-2.5 px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
           >
-            변명 만들기
+            {isSubmitting && (
+              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-90" d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            )}
+            {isSubmitting ? "변명 짜는 중..." : isLoadingMeta ? "선택지 불러오는 중..." : "변명 만들기"}
           </button>
 
           {errorMessage && (
