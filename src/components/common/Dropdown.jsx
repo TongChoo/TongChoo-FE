@@ -9,6 +9,7 @@ export default function Dropdown({
   value,
   options,
   onChange,
+  panelClassName = "absolute left-0 right-0 top-full z-20 mt-1.5 bg-white border border-border-soft rounded-md shadow-[0_8px_24px_rgba(11,42,85,0.10)] py-1",
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -59,7 +60,7 @@ export default function Dropdown({
       {isOpen && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 top-full z-20 mt-1.5 bg-white border border-border-soft rounded-md shadow-[0_8px_24px_rgba(11,42,85,0.10)] py-1"
+          className={panelClassName}
         >
           {options.map((option) => {
             const isSelected = option.code === value;
