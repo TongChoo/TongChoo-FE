@@ -130,7 +130,8 @@ export default function MyPagePage() {
       updateAuthNickname(updatedProfile.nickname);
       setNicknameSuccess("닉네임이 변경되었습니다.");
     } catch (error) {
-      setNicknameError(error.message || "닉네임 변경에 실패했습니다.");
+      const fieldError = error.data?.nickname;
+      setNicknameError(fieldError || error.message || "닉네임 변경에 실패했습니다.");
     } finally {
       setIsSavingNickname(false);
     }
@@ -158,7 +159,8 @@ export default function MyPagePage() {
       setPasswordForm({ currentPassword: "", newPassword: "" });
       setPasswordSuccess("비밀번호가 변경되었습니다.");
     } catch (error) {
-      setPasswordError(error.message || "비밀번호 변경에 실패했습니다.");
+      const fieldError = error.data?.currentPassword || error.data?.newPassword;
+      setPasswordError(fieldError || error.message || "비밀번호 변경에 실패했습니다.");
     } finally {
       setIsChangingPassword(false);
     }

@@ -2,7 +2,7 @@ import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
-// Frontend.m               d §3.1: 이 경로들만 인증 헤더 없이 호출 가능
+// Frontend.md §3.1: 이 경로들만 인증 헤더 없이 호출 가능
 const PUBLIC_PATHS = ["/api/auth/signup", "/api/auth/login", "/api/meta"];
 
 function isPublicPath(path) {

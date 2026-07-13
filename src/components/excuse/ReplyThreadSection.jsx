@@ -25,6 +25,7 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [incomingMessage, setIncomingMessage] = useState("");
   const [replyError, setReplyError] = useState("");
+  const [isServerRoundLimitReached, setIsServerRoundLimitReached] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef(null);
 
@@ -36,6 +37,7 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
     setIsFormOpen(false);
     setIncomingMessage("");
     setReplyError("");
+    setIsServerRoundLimitReached(false);
   }, [excuse?.id]);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
   }, [isFormOpen]);
 
   const currentRound = excuse?.roundNumber ?? 1;
-  const isRoundLimitReached = currentRound >= MAX_ROUND;
+  const isRoundLimitReached = currentRound >= MAX_ROUND || isServerRoundLimitReached;
   const hasComplexityWarning = Boolean(excuse?.complexityWarning?.message);
 
   async function handleReplySubmit(event) {
@@ -84,7 +86,13 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
       setIsFormOpen(false);
       onReplySuccess?.(nextReply);
     } catch (error) {
-      setReplyError(error.message || "답장 준비에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      if (error.status === 409) {
+        setIsFormOpen(false);
+        setIsServerRoundLimitReached(true);
+        setReplyError("");
+      } else {
+        setReplyError(error.message || "답장 준비에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -93,6 +93,7 @@ export default function ExcuseFormPage() {
   const [targets, setTargets] = useState(fallbackTargets);
   const [tones, setTones] = useState(fallbackTones);
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [metaNotice, setMetaNotice] = useState("");
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -138,12 +139,18 @@ export default function ExcuseFormPage() {
 
     if (!situation.trim() || !target || !tone) {
       setErrorMessage("위기 상황과 상대, 강도를 모두 입력해주세요.");
+      setFieldErrors({
+        situation: !situation.trim() ? "위기 상황을 입력해주세요." : "",
+        target: !target ? "변명 상대를 선택해주세요." : "",
+        tone: !tone ? "변명 강도를 선택해주세요." : "",
+      });
       return;
     }
 
     try {
       setIsSubmitting(true);
       setErrorMessage("");
+      setFieldErrors({});
 
       const excuse = await excuseApi.createExcuse({
         situation: situation.trim(),
@@ -159,7 +166,11 @@ export default function ExcuseFormPage() {
       });
       navigate("/excuses/result");
     } catch (error) {
-      setErrorMessage(error.message || "변명 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      if (error.data && typeof error.data === "object") {
+        setFieldErrors(error.data);
+      } else {
+        setErrorMessage(error.message || "변명 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -214,37 +225,59 @@ export default function ExcuseFormPage() {
             onChange={(event) => {
               setSituation(event.target.value);
               setErrorMessage("");
+              setFieldErrors((prev) => ({ ...prev, situation: "" }));
             }}
             className="mt-4 w-full rounded-md border border-border-input bg-white px-4 py-3.5 text-base text-navy-900 placeholder:text-[#a3b2c7] focus:outline-none focus:border-brand-primary transition resize-none"
           />
           <span className="mt-1.5 block text-right text-xs font-normal text-navy-500">
             {situation.length}/500
           </span>
+          {fieldErrors.situation && (
+            <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+              {fieldErrors.situation}
+            </p>
+          )}
         </section>
 
         <section aria-label="변명 상대와 강도" className="mt-5 border border-border-soft rounded-lg p-6 sm:p-7">
           <h2 className="text-sm font-bold text-navy-700">누구에게, 얼마나 뻔뻔하게?</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <OptionDropdown
-              label="변명 상대"
-              placeholder="선택하세요"
-              value={target}
-              options={targets}
-              onChange={(value) => {
-                setTarget(value);
-                setErrorMessage("");
-              }}
-            />
-            <OptionDropdown
-              label="변명 강도"
-              placeholder="선택하세요"
-              value={tone}
-              options={tones}
-              onChange={(value) => {
-                setTone(value);
-                setErrorMessage("");
-              }}
-            />
+            <div>
+              <OptionDropdown
+                label="변명 상대"
+                placeholder="선택하세요"
+                value={target}
+                options={targets}
+                onChange={(value) => {
+                  setTarget(value);
+                  setErrorMessage("");
+                  setFieldErrors((prev) => ({ ...prev, target: "" }));
+                }}
+              />
+              {fieldErrors.target && (
+                <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                  {fieldErrors.target}
+                </p>
+              )}
+            </div>
+            <div>
+              <OptionDropdown
+                label="변명 강도"
+                placeholder="선택하세요"
+                value={tone}
+                options={tones}
+                onChange={(value) => {
+                  setTone(value);
+                  setErrorMessage("");
+                  setFieldErrors((prev) => ({ ...prev, tone: "" }));
+                }}
+              />
+              {fieldErrors.tone && (
+                <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                  {fieldErrors.tone}
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
