@@ -41,8 +41,8 @@ function AftermathCountdownBadge({ days }) {
   return (
     <span
       className={[
-        "px-2 py-1 text-xs font-bold rounded-md whitespace-nowrap shrink-0",
-        isSoon ? "text-danger-text bg-danger-bg" : "text-brand-primary bg-brand-primary-soft",
+        "text-xs font-bold whitespace-nowrap shrink-0",
+        isSoon ? "text-danger-text" : "text-brand-primary",
       ].join(" ")}
     >
       {label}
@@ -174,7 +174,7 @@ export default function MyPagePage() {
   return (
     <main className="max-w-7xl mx-auto px-6 py-10 bg-white">
       {pageError && (
-        <p role="alert" className="mb-4 inline-block text-sm font-medium text-danger-text bg-danger-bg rounded-md px-3.5 py-2.5">
+        <p role="alert" className="mb-4 text-sm font-medium text-danger-text">
           {pageError}
         </p>
       )}
@@ -209,7 +209,7 @@ export default function MyPagePage() {
               <div>
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <h1 className="text-xl font-bold text-navy-950">{profile?.nickname ?? "사용자"}</h1>
-                  <Link to="/rank" className="px-2 py-0.5 text-[10px] font-bold text-brand-primary bg-brand-primary-soft rounded-md hover:bg-[#d8ecfd] transition-colors whitespace-nowrap">
+                  <Link to="/rank" className="text-[10px] font-bold text-brand-primary hover:text-brand-primary-hover transition-colors whitespace-nowrap">
                     {profile?.gradeLabel ?? "등급"} &rarr;
                   </Link>
                 </div>
@@ -308,7 +308,7 @@ export default function MyPagePage() {
               </form>
               {passwordError && <p role="alert" className="mt-2 text-sm font-medium text-danger-text">{passwordError}</p>}
               {passwordSuccess && (
-                <p role="status" className="mt-2 text-sm font-medium text-suspicion-low-text bg-suspicion-low-bg rounded-md px-3 py-2">
+                <p role="status" className="mt-2 text-sm font-medium text-suspicion-low-text">
                   {passwordSuccess}
                 </p>
               )}
@@ -338,7 +338,7 @@ export default function MyPagePage() {
                   <Link to={`/excuses/${excuse.id}`} className="min-w-0 hover:text-brand-primary transition-colors">
                     <p className="text-sm font-normal text-navy-900 truncate">{excuse.situation}</p>
                     <div className="mt-1.5 flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-0.5 text-[11px] font-medium text-brand-primary bg-brand-primary-soft rounded-md whitespace-nowrap">
+                      <span className="text-[11px] font-medium text-brand-primary whitespace-nowrap">
                         {targetLabels[excuse.target] ?? excuse.target} · {toneLabels[excuse.tone] ?? excuse.tone}
                       </span>
                       <span className="text-xs font-normal text-navy-300 whitespace-nowrap">{formatDate(excuse.createdAt)}</span>

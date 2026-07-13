@@ -123,7 +123,7 @@ export default function RankPage() {
       <h1 className="text-2xl font-bold text-navy-950">내 등급</h1>
 
       {errorMessage && (
-        <p role="alert" className="mt-4 inline-block text-sm font-medium text-danger-text bg-danger-bg rounded-md px-3.5 py-2.5">
+        <p role="alert" className="mt-4 text-sm font-medium text-danger-text">
           {errorMessage}
         </p>
       )}
@@ -152,7 +152,7 @@ export default function RankPage() {
               </div>
 
               {isMaxGrade ? (
-                <p className="mt-4 inline-block px-3 py-1.5 text-sm font-bold text-white bg-brand-primary rounded-md">
+                <p className="mt-4 text-sm font-bold text-brand-primary">
                   🏆 최고 등급 달성 — 변명의 신
                 </p>
               ) : (
@@ -200,7 +200,7 @@ export default function RankPage() {
                     {isAchieved ? `${tier.minXp} XP~` : remainingXp > 0 ? `앞으로 ${remainingXp} XP` : `${tier.minXp} XP~`}
                   </p>
                   {isCurrent && (
-                    <span className="mt-2 inline-block px-2 py-0.5 text-[10px] font-bold text-white bg-brand-primary rounded-md">
+                    <span className="mt-2 inline-block text-[10px] font-bold text-brand-primary">
                       현재 등급
                     </span>
                   )}

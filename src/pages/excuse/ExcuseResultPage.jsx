@@ -22,9 +22,9 @@ const toneLabels = {
 };
 
 const suspicionClassNames = {
-  LOW: "bg-suspicion-low-bg text-suspicion-low-text",
-  MEDIUM: "bg-suspicion-medium-bg text-suspicion-medium-text",
-  HIGH: "bg-suspicion-high-bg text-suspicion-high-text",
+  LOW: "text-suspicion-low-text",
+  MEDIUM: "text-suspicion-medium-text",
+  HIGH: "text-suspicion-high-text",
 };
 
 const evolveOptions = [
@@ -212,7 +212,7 @@ export default function ExcuseResultPage() {
       <h1 className="mt-3 text-2xl font-bold text-navy-950">변명 결과</h1>
 
       {notice && (
-        <p role="status" className="mt-4 inline-block text-sm font-medium text-brand-primary bg-brand-primary-soft rounded-md px-3.5 py-2.5">
+        <p role="status" className="mt-4 text-sm font-medium text-brand-primary">
           {notice}
         </p>
       )}
@@ -222,13 +222,13 @@ export default function ExcuseResultPage() {
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs font-normal text-navy-300">
             <span>상황: {excuse.situation ?? "방금 만든 위기 상황"}</span>
             <span aria-hidden="true">·</span>
-            <span className="px-2 py-0.5 text-[11px] font-medium text-brand-primary bg-brand-primary-soft rounded-md">
+            <span className="text-[11px] font-medium text-brand-primary">
               {targetLabel} · {toneLabel}
             </span>
             <span aria-hidden="true">·</span>
             <span>생성 시각 {formatDateTime(excuse.createdAt)}</span>
           </div>
-          <span className="shrink-0 px-2.5 py-1 text-xs font-bold text-brand-primary bg-brand-primary-soft rounded-md whitespace-nowrap">
+          <span className="shrink-0 text-xs font-bold text-brand-primary whitespace-nowrap">
             {roundNumber} / 5 라운드
           </span>
         </div>
@@ -255,7 +255,7 @@ export default function ExcuseResultPage() {
               <div className="py-3 bg-surface-soft rounded-md text-center">
                 <dt className="text-[11px] font-normal text-navy-500">의심 위험도</dt>
                 <dd className="mt-0.5">
-                  <span className={`inline-block px-2.5 py-1 text-sm font-bold rounded-md ${suspicionClassNames[suspicionLevel] ?? suspicionClassNames.MEDIUM}`}>
+                  <span className={`text-sm font-bold ${suspicionClassNames[suspicionLevel] ?? suspicionClassNames.MEDIUM}`}>
                     {suspicionLevel}
                   </span>
                 </dd>
@@ -328,7 +328,7 @@ export default function ExcuseResultPage() {
             </form>
 
             {excuse.complexityWarning?.enabled && (
-              <p className="mt-4 text-sm font-medium text-suspicion-medium-text bg-suspicion-medium-bg rounded-md px-3.5 py-2.5">
+              <p className="mt-4 text-sm font-medium text-suspicion-medium-text">
                 ⚠️ {excuse.complexityWarning.message}
               </p>
             )}

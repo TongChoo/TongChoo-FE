@@ -20,15 +20,13 @@ const fallbackTones = [
   { code: "BULLSHIT", label: "개소리 모드" },
 ];
 
-function OptionDropdown({ label, placeholder, value, options, onChange }) {
+function OptionDropdown({ placeholder, value, options, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find((option) => option.code === value);
 
   return (
-    <div>
-      <span className="block text-xs font-medium text-navy-500">{label}</span>
-      <div className="relative mt-1.5">
-        <button
+    <div className="relative">
+      <button
           type="button"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
@@ -82,7 +80,6 @@ function OptionDropdown({ label, placeholder, value, options, onChange }) {
           </ul>
         )}
       </div>
-    </div>
   );
 }
 
@@ -177,130 +174,138 @@ export default function ExcuseFormPage() {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 bg-white">
-      <h1 className="text-2xl font-bold text-navy-950">지금 무슨 위기인가요?</h1>
-      <p className="mt-1.5 text-sm font-normal text-navy-500">
+    <main className="max-w-7xl mx-auto px-6 py-12 bg-white">
+      <h1 className="text-3xl font-bold text-navy-950">지금 무슨 위기인가요?</h1>
+      <p className="mt-2 text-base font-normal text-navy-500">
         위기 상황을 자세히 적어주시면, AI가 상대와 강도에 맞춰 변명을 만들고 성공 확률까지 계산해드려요.
       </p>
       {metaNotice && (
-        <p role="status" className="mt-4 inline-block text-sm font-medium text-brand-primary bg-brand-primary-soft rounded-md px-3.5 py-2.5">
+        <p role="status" className="mt-4 text-sm font-medium text-brand-primary">
           {metaNotice}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6">
-        <section aria-label="위기 상황" className="border-2 border-[#bedafd] bg-brand-primary-soft/40 rounded-lg p-6 sm:p-8">
-          <div className="flex items-start gap-3">
-            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-brand-primary text-white shrink-0" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                className="w-4.5 h-4.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8" />
-              </svg>
+      <form onSubmit={handleSubmit} className="mt-8">
+        {/* 2단 레이아웃: 위기 상황(좌, 넓게) / 상대·강도 선택 + 제출 버튼(우, 좁게)을 나란히 둬서
+            제출 버튼이 텍스트 입력 아래로 한참 밀려 내려가지 않고 첫 화면에서 바로 보이게 한다.
+            좌측 카드에는 브랜드 컬러 top accent(border-t-4)를 얇게 둘러 화이트 배경 사이에 포인트를 준다. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6 items-start">
+          <section className="bg-white border border-border-soft border-t-4 border-t-brand-primary rounded-2xl p-8 sm:p-10">
+            <label htmlFor="situation" className="block text-xl font-bold text-navy-950">
+              위기 상황을 알려주세요
+            </label>
+            <p className="mt-1 text-sm font-normal text-navy-500">
+              최대한 자세히 적을수록 AI가 더 그럴듯한 변명을 만들어요
+            </p>
+
+            <textarea
+              id="situation"
+              name="situation"
+              required
+              maxLength={500}
+              rows={12}
+              placeholder="예: 팀 프로젝트 회의에 늦잠 자서 못 갔다"
+              value={situation}
+              onChange={(event) => {
+                setSituation(event.target.value);
+                setErrorMessage("");
+                setFieldErrors((prev) => ({ ...prev, situation: "" }));
+              }}
+              className="mt-5 w-full rounded-md border border-border-input bg-white px-4 py-3.5 text-base text-navy-900 placeholder:text-[#a3b2c7] focus:outline-none focus:border-brand-primary transition resize-none"
+            />
+            <span className="mt-1.5 block text-right text-xs font-normal text-navy-500">
+              {situation.length}/500
             </span>
-            <div className="flex-1 min-w-0">
-              <label htmlFor="situation" className="block text-base font-bold text-navy-950">
-                위기 상황을 알려주세요
-              </label>
-              <p className="mt-0.5 text-sm font-normal text-navy-500">
-                최대한 자세히 적을수록 AI가 더 그럴듯한 변명을 만들어요
+            {fieldErrors.situation && (
+              <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                {fieldErrors.situation}
               </p>
-            </div>
-          </div>
-
-          <textarea
-            id="situation"
-            name="situation"
-            required
-            maxLength={500}
-            rows={6}
-            placeholder="예: 팀 프로젝트 회의에 늦잠 자서 못 갔다"
-            value={situation}
-            onChange={(event) => {
-              setSituation(event.target.value);
-              setErrorMessage("");
-              setFieldErrors((prev) => ({ ...prev, situation: "" }));
-            }}
-            className="mt-4 w-full rounded-md border border-border-input bg-white px-4 py-3.5 text-base text-navy-900 placeholder:text-[#a3b2c7] focus:outline-none focus:border-brand-primary transition resize-none"
-          />
-          <span className="mt-1.5 block text-right text-xs font-normal text-navy-500">
-            {situation.length}/500
-          </span>
-          {fieldErrors.situation && (
-            <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
-              {fieldErrors.situation}
-            </p>
-          )}
-        </section>
-
-        <section aria-label="변명 상대와 강도" className="mt-5 border border-border-soft rounded-lg p-6 sm:p-7">
-          <h2 className="text-sm font-bold text-navy-700">누구에게, 얼마나 뻔뻔하게?</h2>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <OptionDropdown
-                label="변명 상대"
-                placeholder="선택하세요"
-                value={target}
-                options={targets}
-                onChange={(value) => {
-                  setTarget(value);
-                  setErrorMessage("");
-                  setFieldErrors((prev) => ({ ...prev, target: "" }));
-                }}
-              />
-              {fieldErrors.target && (
-                <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
-                  {fieldErrors.target}
-                </p>
-              )}
-            </div>
-            <div>
-              <OptionDropdown
-                label="변명 강도"
-                placeholder="선택하세요"
-                value={tone}
-                options={tones}
-                onChange={(value) => {
-                  setTone(value);
-                  setErrorMessage("");
-                  setFieldErrors((prev) => ({ ...prev, tone: "" }));
-                }}
-              />
-              {fieldErrors.tone && (
-                <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
-                  {fieldErrors.tone}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <button
-            type="submit"
-            disabled={isLoadingMeta || isSubmitting}
-            className="w-full sm:w-auto sm:min-w-[280px] flex items-center justify-center gap-2.5 px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            {isSubmitting && (
-              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
-                <path className="opacity-90" d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-              </svg>
             )}
-            {isSubmitting ? "변명 짜는 중..." : isLoadingMeta ? "선택지 불러오는 중..." : "변명 만들기"}
-          </button>
+          </section>
 
-          {errorMessage && (
-            <p role="alert" className="w-full sm:w-auto text-sm font-medium text-danger-text bg-danger-bg rounded-md px-3.5 py-2.5 text-center">
-              {errorMessage}
-            </p>
-          )}
+          <section className="bg-white border border-border-soft rounded-2xl">
+            <div className="p-8 sm:p-9">
+              <h2 className="text-xl font-bold text-navy-950">누구에게, 얼마나 뻔뻔하게?</h2>
+              <p className="mt-1 text-sm font-normal text-navy-300">
+                예: 팀장에게는 능글맞은맛으로
+              </p>
+              <div className="mt-6 flex flex-col gap-5">
+                <div>
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-navy-500">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-brand-primary shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="8" r="3.5" />
+                      <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+                    </svg>
+                    변명 상대
+                  </span>
+                  <div className="mt-1.5">
+                    <OptionDropdown
+                      placeholder="선택하세요"
+                      value={target}
+                      options={targets}
+                      onChange={(value) => {
+                        setTarget(value);
+                        setErrorMessage("");
+                        setFieldErrors((prev) => ({ ...prev, target: "" }));
+                      }}
+                    />
+                  </div>
+                  {fieldErrors.target && (
+                    <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                      {fieldErrors.target}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-navy-500">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-brand-primary shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M8.5 14.5a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                    </svg>
+                    변명 강도
+                  </span>
+                  <div className="mt-1.5">
+                    <OptionDropdown
+                      placeholder="선택하세요"
+                      value={tone}
+                      options={tones}
+                      onChange={(value) => {
+                        setTone(value);
+                        setErrorMessage("");
+                        setFieldErrors((prev) => ({ ...prev, tone: "" }));
+                      }}
+                    />
+                  </div>
+                  {fieldErrors.tone && (
+                    <p role="alert" className="mt-1.5 text-sm font-medium text-danger-text">
+                      {fieldErrors.tone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-8 sm:px-9 py-7 border-t border-border-soft">
+              <button
+                type="submit"
+                disabled={isLoadingMeta || isSubmitting}
+                className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                {isSubmitting && (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" />
+                    <path className="opacity-90" d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                )}
+                {isSubmitting ? "변명 짜는 중..." : isLoadingMeta ? "선택지 불러오는 중..." : "변명 만들기"}
+              </button>
+
+              {errorMessage && (
+                <p role="alert" className="mt-3 text-sm font-medium text-danger-text text-center">
+                  {errorMessage}
+                </p>
+              )}
+            </div>
+          </section>
         </div>
       </form>
     </main>

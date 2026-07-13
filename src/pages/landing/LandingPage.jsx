@@ -9,10 +9,10 @@ const features = [
         description: "상대와 강도만 고르면, 딱 맞는 변명이 바로 나와요.",
         preview: (
             <div className="mt-auto pt-4 flex flex-wrap gap-1.5">
-                <span className="px-2 py-1 text-[11px] font-medium text-brand-primary bg-brand-primary-soft rounded-md">
+                <span className="text-[11px] font-medium text-brand-primary">
                     팀장
                 </span>
-                <span className="px-2 py-1 text-[11px] font-medium text-brand-primary bg-brand-primary-soft rounded-md">
+                <span className="text-[11px] font-medium text-brand-primary">
                     개소리 모드
                 </span>
             </div>
@@ -26,14 +26,14 @@ const features = [
         description: "현실성·설득력·의심 위험도까지 숫자로 확인해요.",
         preview: (
             <div className="mt-auto pt-4 flex items-center gap-1.5 text-center">
-                <div className="flex-1 py-2 bg-surface-soft rounded-md">
+                <div className="flex-1 py-2">
                     <p className="text-sm font-bold text-brand-primary">82%</p>
                 </div>
-                <div className="flex-1 py-2 bg-surface-soft rounded-md">
+                <div className="flex-1 py-2">
                     <p className="text-sm font-bold text-brand-primary">4/5</p>
                 </div>
-                <div className="flex-1 py-2 bg-danger-bg rounded-md">
-                    <p className="text-sm font-bold text-danger-text">HIGH</p>
+                <div className="flex-1 py-2">
+                    <p className="text-sm font-bold text-suspicion-medium-text">MEDIUM</p>
                 </div>
             </div>
         ),
@@ -77,11 +77,11 @@ const features = [
         description: "변명을 만들수록 경험치가 쌓여 등급이 올라가요.",
         preview: (
             <div className="mt-auto pt-4 flex items-center gap-1.5">
-                <span className="px-2.5 py-1 text-[11px] font-bold text-navy-950 bg-[#84bbf6] rounded-md whitespace-nowrap">
+                <span className="text-[11px] font-bold text-brand-primary whitespace-nowrap">
                     핑계 전문가
                 </span>
                 <span className="text-navy-300">›</span>
-                <span className="px-2.5 py-1 text-[11px] font-bold text-white bg-[#4c98ee] rounded-md whitespace-nowrap">
+                <span className="text-[11px] font-bold text-brand-primary whitespace-nowrap">
                     사회생활 마스터
                 </span>
             </div>
@@ -98,28 +98,23 @@ const features = [
 const grades = [
     {
         label: "초보 변명러",
-        className:
-            "bg-white ring-1 ring-border-ring text-navy-950 shadow-[0_4px_12px_rgba(11,42,85,0.035)]",
+        className: "bg-white ring-1 ring-border-ring text-navy-950",
     },
     {
         label: "위기 생존자",
-        className:
-            "bg-[#bedafd] text-navy-950 shadow-[0_4px_12px_rgba(21,126,251,0.07)]",
+        className: "bg-[#bedafd] text-navy-950",
     },
     {
         label: "핑계 전문가",
-        className:
-            "bg-[#84bbf6] text-navy-950 shadow-[0_5px_13px_rgba(21,126,251,0.09)]",
+        className: "bg-[#84bbf6] text-navy-950",
     },
     {
         label: "사회생활 마스터",
-        className:
-            "bg-[#4c98ee] text-navy-950 shadow-[0_5px_14px_rgba(21,126,251,0.11)]",
+        className: "bg-[#4c98ee] text-navy-950",
     },
     {
         label: "변명의 신",
-        className:
-            "bg-brand-primary text-white shadow-[0_6px_16px_rgba(21,126,251,0.14)]",
+        className: "bg-brand-primary text-white",
     },
 ];
 
@@ -151,7 +146,7 @@ export default function LandingPage() {
                 >
                     <div className="max-w-7xl mx-auto px-6 pt-15 py-20 grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-14 items-center">
                         <div className="max-w-xl">
-                            <span className="inline-block px-3 py-1 text-xs font-medium tracking-wide text-brand-primary bg-brand-primary-soft rounded-md">
+                            <span className="inline-block text-xs font-medium tracking-wide text-brand-primary">
                                 AI 위기 대응 서비스
                             </span>
                             <h1 className="mt-5 text-4xl md:text-5xl leading-tight tracking-tight text-navy-950">
@@ -205,7 +200,7 @@ export default function LandingPage() {
 
                 <section
                     aria-label="핵심 기능"
-                    className="bg-surface-soft scroll-mt-20"
+                    className="bg-white scroll-mt-20"
                 >
                     <div className="max-w-7xl mx-auto px-6 py-20">
                         <div className="max-w-xl mx-auto text-center">
@@ -225,7 +220,7 @@ export default function LandingPage() {
                             {features.map((feature) => (
                                 <li
                                     key={feature.title}
-                                    className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(11,42,85,0.08)] p-7 flex flex-col min-h-[240px]"
+                                    className="bg-white rounded-2xl border border-border-soft p-7 flex flex-col min-h-[240px]"
                                 >
                                     <div className="w-14 h-14 rounded-xl bg-brand-primary-soft text-brand-primary flex items-center justify-center shrink-0">
                                         <svg
@@ -260,7 +255,7 @@ export default function LandingPage() {
                 >
                     <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-14 items-center">
                         <div>
-                            <span className="inline-block px-3 py-1 text-xs font-medium tracking-wide text-brand-primary bg-brand-primary-soft rounded-md">
+                            <span className="inline-block text-xs font-medium tracking-wide text-brand-primary">
                                 실제 결과 미리보기
                             </span>
                             <h2 className="mt-4 text-2xl md:text-3xl font-bold text-navy-950">
@@ -288,9 +283,9 @@ export default function LandingPage() {
                             </ul>
                         </div>
 
-                        <article className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(11,42,85,0.08)] p-6 max-w-md w-full lg:ml-auto">
+                        <article className="bg-white rounded-2xl border border-border-soft p-6 max-w-md w-full lg:ml-auto">
                             <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-1 text-xs font-medium text-brand-primary bg-brand-primary-soft rounded-md">
+                                <span className="text-xs font-medium text-brand-primary">
                                     팀장 · 능글맞은맛
                                 </span>
                                 <span className="text-xs font-bold text-navy-500">
@@ -307,25 +302,25 @@ export default function LandingPage() {
                                     [
                                         "성공 확률",
                                         "82%",
-                                        "bg-surface-soft",
+                                        "",
                                         "text-brand-primary",
                                     ],
                                     [
                                         "현실성",
                                         "4 / 5",
-                                        "bg-surface-soft",
+                                        "",
                                         "text-brand-primary",
                                     ],
                                     [
                                         "의심 위험도",
-                                        "HIGH",
-                                        "bg-danger-bg",
-                                        "text-danger-text",
+                                        "MEDIUM",
+                                        "",
+                                        "text-suspicion-medium-text",
                                     ],
                                 ].map(([label, value, bg, text]) => (
                                     <div
                                         key={label}
-                                        className={`py-3 ${bg} rounded-md`}
+                                        className={`py-3 ${bg}`}
                                     >
                                         <dt className="text-[11px] font-normal text-navy-500 order-2 mt-0.5">
                                             {label}
@@ -361,7 +356,7 @@ export default function LandingPage() {
 
                 <section
                     aria-label="등급 체계 미리보기"
-                    className="bg-surface-soft scroll-mt-20"
+                    className="bg-white scroll-mt-20"
                 >
                     <div className="max-w-7xl mx-auto px-6 py-24">
                         <div className="text-center">
