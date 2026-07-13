@@ -53,7 +53,7 @@ function OptionDropdown({ placeholder, value, options, onChange }) {
         {isOpen && (
           <ul
             role="listbox"
-            className="absolute left-0 right-0 top-full z-20 mt-1.5 bg-white border border-border-soft rounded-md shadow-[0_8px_24px_rgba(11,42,85,0.10)] py-1"
+            className="absolute left-0 right-0 top-full z-20 mt-1.5 bg-white border border-border-soft rounded-md py-1"
           >
             {options.map((option) => {
               const isSelected = option.code === value;
@@ -288,7 +288,7 @@ export default function ExcuseFormPage() {
               <button
                 type="submit"
                 disabled={isLoadingMeta || isSubmitting}
-                className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+                className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 text-base font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isSubmitting && (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

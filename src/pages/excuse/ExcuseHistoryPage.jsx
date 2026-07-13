@@ -283,6 +283,11 @@ export default function ExcuseHistoryPage() {
                                     >
                                         <td className="px-6 py-6 text-base font-medium text-navy-900">
                                             {excuse.situation}
+                                            {Number(excuse.roundNumber) > 1 && (
+                                                <span className="mt-1 block text-xs font-bold text-brand-primary">
+                                                    {excuse.roundNumber}라운드까지 진행
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-6">
                                             <span className="text-sm font-medium text-brand-primary whitespace-nowrap">

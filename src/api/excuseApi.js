@@ -13,6 +13,9 @@ export const excuseApi = {
   evolveExcuse: ({ excuseId, direction }) =>
     apiClient.post(`/api/excuses/${excuseId}/evolve`, { direction }),
 
-  replyToExcuse: ({ excuseId, incomingMessage }) =>
-    apiClient.post(`/api/excuses/${excuseId}/reply`, { incomingMessage }),
+  replyToExcuse: ({ excuseId, incomingMessage, currentExcuse }) =>
+    apiClient.post(`/api/excuses/${excuseId}/reply`, {
+      incomingMessage,
+      currentExcuse,
+    }),
 };

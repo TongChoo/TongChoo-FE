@@ -405,7 +405,7 @@ export default function ExcuseDetailPage() {
                             <button
                                 type="submit"
                                 disabled={isEvolving}
-                                className="px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 {isEvolving ? "진화시키는 중..." : "진화시키기"}
                             </button>

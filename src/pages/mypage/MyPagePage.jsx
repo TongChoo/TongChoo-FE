@@ -249,7 +249,7 @@ export default function MyPagePage() {
                 <button
                   type="submit"
                   disabled={isSavingNickname}
-                  className="self-start px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="self-start px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSavingNickname ? "저장 중..." : "저장"}
                 </button>
@@ -301,7 +301,7 @@ export default function MyPagePage() {
                 <button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="self-start px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="self-start px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isChangingPassword ? "변경 중..." : "변경하기"}
                 </button>
@@ -329,8 +329,35 @@ export default function MyPagePage() {
 
           <ul className="mt-3 divide-y divide-border-soft">
             {recentExcuses.length === 0 ? (
-              <li className="py-5 text-sm font-normal text-navy-500">
-                아직 만든 변명이 없어요. 첫 변명을 만들어보세요.
+              <li className="rounded-lg border border-dashed border-[#cddcf0] bg-surface-soft px-6 py-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-primary shadow-[0_4px_12px_rgba(21,126,251,0.10)]">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 4h12v4a6 6 0 0 1-12 0V4Z" />
+                    <path d="M8 4V2h8v2M9 19h6M12 14v5" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-sm font-bold text-navy-900">
+                  아직 저장된 변명이 없어요
+                </h3>
+                <p className="mt-1.5 text-xs font-normal text-navy-500">
+                  첫 번째 변명을 만들고 나만의 위기 대응 기록을 시작해보세요.
+                </p>
+                <Link
+                  to="/create"
+                  className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-brand-primary px-4 py-2 text-xs font-bold text-white transition-all hover:bg-brand-primary-hover"
+                >
+                  첫 변명 만들기
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
               </li>
             ) : (
               recentExcuses.map((excuse) => (

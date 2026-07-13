@@ -124,8 +124,8 @@ function PrimaryCta({ children, to, inverted = false }) {
             to={to}
             className={
                 inverted
-                    ? "inline-block px-8 py-3 text-base font-bold text-brand-primary bg-white rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.14)] hover:bg-brand-primary-soft hover:shadow-[0_5px_14px_rgba(0,0,0,0.17)] transition-all"
-                    : "inline-block px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all"
+                    ? "inline-block px-8 py-3 text-base font-bold text-brand-primary bg-white rounded-md hover:bg-brand-primary-soft transition-all"
+                    : "inline-block px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all"
             }
         >
             {children}

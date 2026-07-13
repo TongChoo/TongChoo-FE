@@ -2,9 +2,11 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { excuseApi } from "../../api/excuseApi";
 import Dropdown from "../../components/common/Dropdown";
+import ComplexityWarningModal from "../../components/common/ComplexityWarningModal";
 import CopyTextButton from "../../components/excuse/CopyTextButton";
 import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
+import { getComplexityWarningMessage } from "../../utils/complexityWarning";
 
 const targetLabels = {
   TEACHER: "선생님",
@@ -142,6 +144,14 @@ export default function ExcuseResultPage() {
     [latestExcuse, getStoredLatestExcuse],
   );
   const [currentExcuse, setCurrentExcuse] = useState(initialExcuse);
+  const [isEvolveWarningModalOpen, setIsEvolveWarningModalOpen] = useState(() =>
+    Boolean(
+      initialExcuse &&
+      !initialExcuse.incomingMessage &&
+      initialExcuse.complexityWarning?.enabled &&
+      initialExcuse.complexityWarning?.message
+    ),
+  );
   const excuse = currentExcuse;
 
   if (!excuse) {
@@ -167,6 +177,11 @@ export default function ExcuseResultPage() {
   const toneLabel = toneLabels[excuse.tone] ?? excuse.tone;
   const suspicionLevel = analysis.suspicionLevel ?? "MEDIUM";
   const roundNumber = excuse.roundNumber ?? 1;
+  const hasEvolveComplexityWarning = Boolean(
+    !excuse.incomingMessage &&
+    excuse.complexityWarning?.enabled &&
+    excuse.complexityWarning?.message
+  );
 
   async function handleEvolveSubmit(event) {
     event.preventDefault();
@@ -196,7 +211,13 @@ export default function ExcuseResultPage() {
       setCurrentExcuse(nextExcuse);
       setLatestExcuse(nextExcuse);
       setSelectedDirection("");
-      setNotice("변명이 선택한 방향으로 진화했어요.");
+      setIsEvolveWarningModalOpen(
+        Boolean(
+          !nextExcuse.incomingMessage &&
+          nextExcuse.complexityWarning?.enabled &&
+          nextExcuse.complexityWarning?.message
+        ),
+      );
     } catch (error) {
       setEvolveError(error.message || "변명 진화에 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
@@ -316,7 +337,7 @@ export default function ExcuseResultPage() {
               <button
                 type="submit"
                 disabled={isEvolving}
-                className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isEvolving && (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -334,10 +355,28 @@ export default function ExcuseResultPage() {
               )}
             </form>
 
-            {excuse.complexityWarning?.enabled && (
-              <p className="mt-4 text-sm font-medium text-suspicion-medium-text">
-                ⚠️ {excuse.complexityWarning.message}
-              </p>
+            {hasEvolveComplexityWarning && !isEvolveWarningModalOpen && (
+              <button
+                type="button"
+                onClick={() => setIsEvolveWarningModalOpen(true)}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-danger-text hover:text-[#c8342f] transition-colors"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0Z" />
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                </svg>
+                설정 충돌 경고 다시 보기
+              </button>
             )}
           </div>
         </div>
@@ -351,6 +390,13 @@ export default function ExcuseResultPage() {
           setLatestExcuse(replyResult);
           setNotice("상대방 답장에 이어지는 다음 변명을 준비했어요.");
         }}
+      />
+
+      <ComplexityWarningModal
+        isOpen={hasEvolveComplexityWarning && isEvolveWarningModalOpen}
+        onClose={() => setIsEvolveWarningModalOpen(false)}
+        title="원본 변명을 확인해 주세요"
+        message={getComplexityWarningMessage(excuse.complexityWarning?.message)}
       />
     </main>
   );

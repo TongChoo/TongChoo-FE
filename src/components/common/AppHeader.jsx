@@ -90,7 +90,7 @@ export default function AppHeader() {
                         </Link>
                         <Link
                             to="/signup"
-                            className="px-5 py-2.5 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_3px_8px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_4px_10px_rgba(21,126,251,0.22)] transition-all"
+                            className="px-5 py-2.5 text-base font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all"
                         >
                             회원가입
                         </Link>

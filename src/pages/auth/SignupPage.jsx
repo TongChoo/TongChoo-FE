@@ -201,7 +201,7 @@ export default function SignupPage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover hover:shadow-[0_5px_12px_rgba(21,126,251,0.22)] transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full px-6 py-3 text-base font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {isSubmitting ? "가입 중..." : "회원가입"}
                     </button>
