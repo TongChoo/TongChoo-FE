@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { excuseApi } from "../../api/excuseApi";
 import Dropdown from "../../components/common/Dropdown";
+import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
 
 const targetLabels = {
@@ -202,10 +203,6 @@ export default function ExcuseResultPage() {
     }
   }
 
-  function showPendingFeature(message) {
-    setNotice(message);
-  }
-
   return (
     <main className="max-w-7xl mx-auto px-6 py-12 bg-white">
       <Link to="/create" className="inline-flex items-center gap-1.5 text-sm font-medium text-navy-500 hover:text-brand-primary transition-colors">
@@ -339,29 +336,14 @@ export default function ExcuseResultPage() {
         </div>
       </div>
 
-      <section aria-label="대화 스레드" className="mt-6 border border-border-soft rounded-lg p-6 sm:p-8">
-        <h2 className="text-base font-bold text-navy-950">대화 스레드</h2>
-        <p className="mt-1.5 text-sm font-normal text-navy-500">
-          상대방이 실제로 뭐라고 답장했는지 알려주면, 그 내용에 이어지는 다음 변명을 준비할 수 있어요.
-        </p>
-
-        <ol className="mt-5 space-y-3">
-          <li className="rounded-md bg-surface-soft p-4">
-            <span className="px-2 py-0.5 text-[11px] font-bold text-white bg-brand-primary rounded-md whitespace-nowrap">
-              {roundNumber}라운드 · 원본
-            </span>
-            <p className="mt-2 text-sm font-normal text-navy-900 leading-relaxed">"{excuse.excuse}"</p>
-          </li>
-        </ol>
-
-        <button
-          type="button"
-          onClick={() => showPendingFeature("답장 준비 기능은 변명 진화 다음 단계에서 API와 연결할게요.")}
-          className="mt-5 px-5 py-2.5 text-sm font-bold text-white bg-brand-primary rounded-md shadow-[0_4px_10px_rgba(21,126,251,0.18)] hover:bg-brand-primary-hover transition-all"
-        >
-          답장 준비하기
-        </button>
-      </section>
+      <ReplyThreadSection
+        excuse={excuse}
+        onReplySuccess={(replyResult) => {
+          setCurrentExcuse(replyResult);
+          setLatestExcuse(replyResult);
+          setNotice("상대방 답장에 이어지는 다음 변명을 준비했어요.");
+        }}
+      />
     </main>
   );
 }
