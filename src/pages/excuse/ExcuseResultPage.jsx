@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { excuseApi } from "../../api/excuseApi";
 import Dropdown from "../../components/common/Dropdown";
+import CopyTextButton from "../../components/excuse/CopyTextButton";
 import ReplyThreadSection from "../../components/excuse/ReplyThreadSection";
 import { useExcuseStore } from "../../store/useExcuseStore";
 
@@ -233,9 +234,15 @@ export default function ExcuseResultPage() {
           </span>
         </div>
 
-        <blockquote className="mt-4 text-xl sm:text-2xl font-medium text-navy-950 leading-snug border-l-4 border-brand-primary pl-4 sm:pl-5">
-          "{excuse.excuse}"
-        </blockquote>
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <blockquote className="text-xl sm:text-2xl font-medium text-navy-950 leading-snug border-l-4 border-brand-primary pl-4 sm:pl-5">
+            "{excuse.excuse}"
+          </blockquote>
+          <CopyTextButton
+            text={excuse.excuse}
+            className="shrink-0 self-start px-4 py-2 text-sm font-bold text-brand-primary border border-border-input rounded-md hover:bg-brand-primary-soft transition-colors"
+          />
+        </div>
 
         <div className="mt-5 pt-5 border-t border-border-soft flex items-center justify-between">
           <p className="text-sm font-medium text-navy-500">획득 경험치</p>

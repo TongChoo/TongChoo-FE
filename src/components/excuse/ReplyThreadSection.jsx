@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { excuseApi } from "../../api/excuseApi";
+import CopyTextButton from "./CopyTextButton";
 
 const MAX_ROUND = 5;
 
@@ -8,6 +9,7 @@ function buildInitialThread(excuse) {
 
     const roundNumber = excuse.roundNumber ?? 1;
     const isReplyRound = Boolean(excuse.incomingMessage);
+    const replyOptions = normalizeReplyOptions(excuse);
 
     return [
         {
@@ -16,8 +18,37 @@ function buildInitialThread(excuse) {
             type: isReplyRound ? "답장" : "원본",
             incomingMessage: excuse.incomingMessage,
             excuseText: excuse.excuse,
+            replyOptions,
+            selectedOptionIndex: 0,
+            regenerated: false,
         },
     ];
+}
+
+function normalizeReplyOptions(excuse) {
+    const options = Array.isArray(excuse?.replyOptions)
+        ? excuse.replyOptions.filter((option) => option && option.trim())
+        : [];
+
+    if (options.length > 0) return options.slice(0, 3);
+    return excuse?.excuse ? [excuse.excuse] : [];
+}
+
+function OptionCheckIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="w-2.5 h-2.5"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M5 13l4 4L19 7" />
+        </svg>
+    );
 }
 
 export default function ReplyThreadSection({ excuse, onReplySuccess }) {
@@ -62,6 +93,7 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                 ...replyResult,
                 situation: replyResult.situation ?? excuse.situation,
             };
+            const replyOptions = normalizeReplyOptions(nextReply);
 
             setThread((prev) => [
                 ...prev,
@@ -70,7 +102,10 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                     roundNumber: nextReply.roundNumber ?? currentRound + 1,
                     type: "답장",
                     incomingMessage: trimmedMessage,
-                    excuseText: nextReply.excuse,
+                    excuseText: replyOptions[0] ?? nextReply.excuse,
+                    replyOptions,
+                    selectedOptionIndex: 0,
+                    regenerated: false,
                 },
             ]);
             setIncomingMessage("");
@@ -92,6 +127,20 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
         }
     }
 
+    function handleSelectReplyOption(threadIndex, optionIndex) {
+        setThread((prev) =>
+            prev.map((item, index) => {
+                if (index !== threadIndex) return item;
+
+                return {
+                    ...item,
+                    selectedOptionIndex: optionIndex,
+                    excuseText: item.replyOptions?.[optionIndex] ?? item.excuseText,
+                };
+            })
+        );
+    }
+
     return (
         <section
             aria-label="대화 스레드"
@@ -104,7 +153,14 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
             </p>
 
             <ol className="mt-5 space-y-3">
-                {thread.map((item) => (
+                {thread.map((item, threadIndex) => {
+                    const isLatest = threadIndex === thread.length - 1;
+                    const shouldShowOptions =
+                        isLatest &&
+                        item.type === "답장" &&
+                        item.replyOptions?.length > 1;
+
+                    return (
                     <li
                         key={`${item.id}-${item.roundNumber}`}
                         className="rounded-md bg-surface-soft p-4"
@@ -120,8 +176,88 @@ export default function ReplyThreadSection({ excuse, onReplySuccess }) {
                         <p className="mt-2 text-sm font-normal text-navy-900 leading-relaxed">
                             "{item.excuseText}"
                         </p>
+
+                        {shouldShowOptions && (
+                            <div className="mt-4">
+                                <p className="text-xs font-bold text-navy-700">
+                                    다른 답장 후보{" "}
+                                    <span className="font-normal text-navy-300">
+                                        · 마음에 드는 답장을 선택하거나 복사하세요
+                                    </span>
+                                </p>
+                                <div className="mt-2 space-y-2">
+                                    {item.replyOptions.map((option, optionIndex) => {
+                                        const isSelected =
+                                            optionIndex === item.selectedOptionIndex;
+
+                                        return (
+                                            <div
+                                                key={`${item.id}-${option}`}
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={() =>
+                                                    handleSelectReplyOption(
+                                                        threadIndex,
+                                                        optionIndex
+                                                    )
+                                                }
+                                                onKeyDown={(event) => {
+                                                    if (
+                                                        event.key === "Enter" ||
+                                                        event.key === " "
+                                                    ) {
+                                                        event.preventDefault();
+                                                        handleSelectReplyOption(
+                                                            threadIndex,
+                                                            optionIndex
+                                                        );
+                                                    }
+                                                }}
+                                                className={[
+                                                    "w-full flex items-start gap-2.5 rounded-md border p-3 text-left text-sm cursor-pointer transition-colors",
+                                                    isSelected
+                                                        ? "border-brand-primary bg-brand-primary-soft"
+                                                        : "border-border-soft bg-white hover:border-[#bedafd]",
+                                                ].join(" ")}
+                                                aria-pressed={isSelected}
+                                            >
+                                                <span
+                                                    className={[
+                                                        "mt-0.5 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center",
+                                                        isSelected
+                                                            ? "border-brand-primary bg-brand-primary"
+                                                            : "border-border-input bg-white",
+                                                    ].join(" ")}
+                                                    aria-hidden="true"
+                                                >
+                                                    {isSelected && <OptionCheckIcon />}
+                                                </span>
+                                                <span
+                                                    className={[
+                                                        "flex-1",
+                                                        isSelected
+                                                            ? "font-medium text-navy-950"
+                                                            : "font-normal text-navy-700",
+                                                    ].join(" ")}
+                                                >
+                                                    "{option}"
+                                                </span>
+                                                <CopyTextButton
+                                                    text={option}
+                                                    label="이 답장 복사"
+                                                    copiedLabel="복사됨"
+                                                    iconOnly
+                                                    className="shrink-0 text-[#a3b2c7] hover:text-brand-primary transition-colors"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </li>
-                ))}
+                    );
+                })}
             </ol>
 
             {!isFormOpen && !isRoundLimitReached && (
