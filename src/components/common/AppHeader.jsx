@@ -1,15 +1,16 @@
 // 공통 헤더. Frontend.md §3.4 AppHeader.
-// 모든 화면(랜딩 포함)에서 AppLayout을 통해 재사용되며, 로그인 여부에 따라 우측 영역만 바뀐다.
-import { Link, NavLink, useNavigate } from "react-router-dom";
+// 모든 화면(랜딩 포함)에서 AppLayout을 통해 재사용되며,
+// 중앙 네비게이션은 서비스 핵심 기능만 두고 마이페이지는 우측 닉네임 링크로 진입한다.
+import { Link, NavLink } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import logo from "../../assets/변기_logo.png";
 
-// Frontend.md §3.4 AppHeader: 로그인 여부와 무관하게 4개 메뉴를 노출하고,
-// 우측 영역만 로그인 상태에 따라 로그인/회원가입 ↔ 닉네임+로그아웃으로 바뀐다.
+// docs/ui/*.html 공통 헤더 기준:
+// 중앙 메뉴는 "변명 만들기 / 내 기록 / 등급"만 두고,
+// 마이페이지는 로그인 상태의 우측 닉네임 링크로 접근한다.
 const NAV_ITEMS = [
     { to: "/create", label: "변명 만들기" },
     { to: "/excuses", label: "내 기록" },
-    { to: "/mypage", label: "마이페이지" },
     { to: "/rank", label: "등급" },
 ];
 
@@ -22,14 +23,7 @@ function navLinkClassName({ isActive }) {
 }
 
 export default function AppHeader() {
-    const { isAuthenticated, nickname, logout } = useAuthStore();
-    const navigate = useNavigate();
-
-    // 로그아웃은 별도 API가 없으므로(서버가 Stateless) localStorage만 비우고 랜딩으로 이동시킨다
-    function handleLogout() {
-        logout();
-        navigate("/");
-    }
+    const { isAuthenticated, nickname } = useAuthStore();
 
     return (
         <header className="sticky top-0 z-50 border-b border-border-soft bg-white/95 backdrop-blur-sm">
@@ -65,18 +59,24 @@ export default function AppHeader() {
                 </nav>
 
                 {isAuthenticated ? (
-                    <div className="flex items-center gap-2 sm:gap-3 justify-self-end">
-                        <span className="hidden sm:inline text-sm font-medium text-navy-500">
-                            {nickname}님
-                        </span>
-                        <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="px-5 py-2.5 text-base font-medium text-navy-950 border border-border-input rounded-md hover:bg-brand-primary-soft transition-colors"
+                    <nav
+                        className="flex items-center gap-2 sm:gap-3 justify-self-end"
+                        aria-label="회원 메뉴"
+                    >
+                        <NavLink
+                            to="/mypage"
+                            className={({ isActive }) =>
+                                [
+                                    "px-5 py-2.5 text-base font-bold rounded-md transition-colors",
+                                    isActive
+                                        ? "text-brand-primary bg-brand-primary-soft"
+                                        : "text-navy-950 hover:bg-brand-primary-soft hover:text-brand-primary",
+                                ].join(" ")
+                            }
                         >
-                            로그아웃
-                        </button>
-                    </div>
+                            {nickname ?? "마이페이지"}님
+                        </NavLink>
+                    </nav>
                 ) : (
                     <nav
                         className="flex items-center gap-2 sm:gap-3 justify-self-end"
