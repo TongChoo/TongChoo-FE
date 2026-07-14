@@ -12,7 +12,7 @@ const targetLabels = {
   LOVER: "연인",
   TEAM_LEAD: "팀장",
   TEAM_MEMBER: "팀원",
-  CUSTOM: "기타",
+  CUSTOM: "직접 입력",
 };
 
 const toneLabels = {
@@ -152,9 +152,7 @@ export default function ExcuseResultPage() {
   }
 
   const analysis = excuse.analysis ?? {};
-  const targetLabel = excuse.target === "CUSTOM"
-    ? excuse.targetDescription || targetLabels.CUSTOM
-    : targetLabels[excuse.target] ?? excuse.target;
+  const targetLabel = excuse.targetDescription?.trim() || targetLabels[excuse.target] || excuse.target;
   const toneLabel = toneLabels[excuse.tone] ?? excuse.tone;
   const suspicionLevel = analysis.suspicionLevel ?? "MEDIUM";
   const roundNumber = excuse.roundNumber ?? 1;

@@ -8,7 +8,12 @@ export const excuseApi = {
     apiClient.get(`/api/excuses/${excuseId}`),
 
   createExcuse: ({ situation, target, targetDescription, tone }) =>
-    apiClient.post("/api/excuses", { situation, target, targetDescription, tone }),
+    apiClient.post("/api/excuses", {
+      situation,
+      target,
+      tone,
+      ...(target === "CUSTOM" ? { targetDescription } : {}),
+    }),
 
   replyToExcuse: ({ excuseId, incomingMessage, currentExcuse }) =>
     apiClient.post(`/api/excuses/${excuseId}/reply`, {
