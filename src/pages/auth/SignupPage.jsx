@@ -114,7 +114,7 @@ export default function SignupPage() {
                     </p>
                 )}
 
-                <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
                     <div>
                         <label
                             htmlFor="email"

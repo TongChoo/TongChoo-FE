@@ -25,6 +25,19 @@ const httpClient = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
+// StrictMode는 개발 중 부작용을 찾기 위해 effect를 한 번 더 실행한다. 같은 GET이
+// 동시에 들어오면 하나의 Promise를 공유하고, 개발 모드에서는 아주 짧게 결과도 재사용한다.
+const inFlightGets = new Map();
+const getResponseCache = new Map();
+
+function getCacheKey(path, config) {
+    return JSON.stringify({
+        path,
+        params: config.params ?? null,
+        token: localStorage.getItem("accessToken") ?? null,
+    });
+}
+
 // Frontend.md §3.1: 공개 경로를 제외한 모든 요청에 Authorization 헤더를 자동으로 붙인다
 httpClient.interceptors.request.use((config) => {
     if (isPublicPath(config.url)) return config;
@@ -61,7 +74,39 @@ httpClient.interceptors.response.use(
 );
 
 export const apiClient = {
-    get: (path, config) => httpClient.get(path, config),
+    get: (path, config = {}) => {
+        const {
+            cacheTtlMs = import.meta.env.DEV ? 1_000 : 0,
+            ...axiosConfig
+        } = config;
+        const cacheKey = getCacheKey(path, axiosConfig);
+        const cached = getResponseCache.get(cacheKey);
+
+        if (cached && cached.expiresAt > Date.now()) {
+            return Promise.resolve(cached.data);
+        }
+        if (cached) getResponseCache.delete(cacheKey);
+        if (inFlightGets.has(cacheKey)) return inFlightGets.get(cacheKey);
+
+        const request = httpClient.get(path, axiosConfig)
+            .then((data) => {
+                if (cacheTtlMs > 0) {
+                    getResponseCache.set(cacheKey, {
+                        data,
+                        expiresAt: Date.now() + cacheTtlMs,
+                    });
+                }
+                return data;
+            })
+            .finally(() => {
+                if (inFlightGets.get(cacheKey) === request) {
+                    inFlightGets.delete(cacheKey);
+                }
+            });
+
+        inFlightGets.set(cacheKey, request);
+        return request;
+    },
     post: (path, body, config) => httpClient.post(path, body, config),
     patch: (path, body, config) => httpClient.patch(path, body, config),
 };

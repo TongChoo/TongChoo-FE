@@ -1,6 +1,7 @@
 // 공통 헤더. Frontend.md §3.4 AppHeader.
 // 모든 화면(랜딩 포함)에서 AppLayout을 통해 재사용되며,
 // 중앙 네비게이션은 서비스 핵심 기능만 두고 마이페이지는 우측 닉네임 링크로 진입한다.
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import logo from "../../assets/변기_logo.png";
@@ -24,12 +25,15 @@ function navLinkClassName({ isActive }) {
 
 export default function AppHeader() {
     const { isAuthenticated, nickname } = useAuthStore();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const closeMenu = () => setIsMenuOpen(false);
 
     return (
-        <header className="sticky top-0 z-50 border-b border-border-soft bg-white/95 backdrop-blur-sm">
+        <header className="sticky top-0 z-50 border-b border-border-soft bg-white/95 backdrop-blur-sm relative">
             <div className="max-w-[1500px] mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-6 px-7 sm:px-10 lg:px-14 py-5 md:py-6">
                 <Link
                     to="/"
+                    onClick={closeMenu}
                     className="flex items-center gap-3 shrink-0 justify-self-start"
                     aria-label="변기 홈으로 이동"
                 >
@@ -58,45 +62,102 @@ export default function AppHeader() {
                     ))}
                 </nav>
 
-                {isAuthenticated ? (
-                    <nav
-                        className="flex items-center gap-2 sm:gap-3 justify-self-end"
-                        aria-label="회원 메뉴"
+                <div className="flex items-center gap-0.5 sm:gap-3 justify-self-end">
+                    <button
+                        type="button"
+                        onClick={() => setIsMenuOpen((prev) => !prev)}
+                        className="md:hidden flex items-center justify-center w-10 h-10 rounded-md text-navy-950 hover:bg-brand-primary-soft transition-colors"
+                        aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+                        aria-expanded={isMenuOpen}
+                        aria-controls="mobile-nav-menu"
                     >
+                        <svg
+                            viewBox="0 0 24 24"
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            {isMenuOpen ? (
+                                <path d="M6 6l12 12M18 6L6 18" />
+                            ) : (
+                                <path d="M4 7h16M4 12h16M4 17h16" />
+                            )}
+                        </svg>
+                    </button>
+
+                    {isAuthenticated ? (
+                        <nav
+                            className="flex items-center gap-2 sm:gap-3"
+                            aria-label="회원 메뉴"
+                        >
+                            <NavLink
+                                to="/mypage"
+                                onClick={closeMenu}
+                                className={({ isActive }) =>
+                                    [
+                                        "px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-bold whitespace-nowrap rounded-md transition-colors",
+                                        isActive
+                                            ? "text-brand-primary"
+                                            : "text-navy-950 hover:text-brand-primary",
+                                    ].join(" ")
+                                }
+                            >
+                                {nickname ? `${nickname}님` : "마이페이지"}
+                            </NavLink>
+                        </nav>
+                    ) : (
+                        <nav
+                            className="flex items-center gap-1.5 sm:gap-3"
+                            aria-label="회원 메뉴"
+                        >
+                            <Link
+                                to="/login"
+                                onClick={closeMenu}
+                                className="px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-normal whitespace-nowrap text-navy-950 hover:bg-brand-primary-soft rounded-md transition-colors"
+                            >
+                                로그인
+                            </Link>
+                            <Link
+                                to="/signup"
+                                onClick={closeMenu}
+                                className="px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-bold whitespace-nowrap text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all"
+                            >
+                                회원가입
+                            </Link>
+                        </nav>
+                    )}
+                </div>
+            </div>
+
+            {isMenuOpen && (
+                <nav
+                    id="mobile-nav-menu"
+                    aria-label="서비스 메뉴 (모바일)"
+                    className="md:hidden absolute left-0 right-0 top-full bg-white border-b border-border-soft shadow-[0_8px_16px_rgba(11,42,85,0.08)] flex flex-col px-7 sm:px-10 py-2"
+                >
+                    {NAV_ITEMS.map((item) => (
                         <NavLink
-                            to="/mypage"
+                            key={item.to}
+                            to={item.to}
+                            onClick={closeMenu}
                             className={({ isActive }) =>
                                 [
-                                    "px-5 py-2.5 text-base font-bold rounded-md transition-colors",
+                                    "px-2 py-3.5 text-base font-semibold border-b border-border-soft last:border-b-0",
                                     isActive
                                         ? "text-brand-primary"
-                                        : "text-navy-950 hover:text-brand-primary",
+                                        : "text-navy-700 hover:text-brand-primary",
                                 ].join(" ")
                             }
                         >
-                            {nickname ? `${nickname}님` : "마이페이지"}
+                            {item.label}
                         </NavLink>
-                    </nav>
-                ) : (
-                    <nav
-                        className="flex items-center gap-2 sm:gap-3 justify-self-end"
-                        aria-label="회원 메뉴"
-                    >
-                        <Link
-                            to="/login"
-                            className="px-5 py-2.5 text-base font-normal text-navy-950 hover:bg-brand-primary-soft rounded-md transition-colors"
-                        >
-                            로그인
-                        </Link>
-                        <Link
-                            to="/signup"
-                            className="px-5 py-2.5 text-base font-bold text-white bg-brand-primary rounded-md hover:bg-brand-primary-hover transition-all"
-                        >
-                            회원가입
-                        </Link>
-                    </nav>
-                )}
-            </div>
+                    ))}
+                </nav>
+            )}
         </header>
     );
 }

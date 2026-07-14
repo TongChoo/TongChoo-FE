@@ -191,7 +191,7 @@ export default function ExcuseFormPage() {
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-8">
+      <form onSubmit={handleSubmit} noValidate className="mt-8">
         {/* 2단 레이아웃: 위기 상황(좌, 넓게) / 상대·강도 선택 + 제출 버튼(우, 좁게)을 나란히 둬서
             제출 버튼이 텍스트 입력 아래로 한참 밀려 내려가지 않고 첫 화면에서 바로 보이게 한다.
             좌측 카드에는 브랜드 컬러 top accent(border-t-4)를 얇게 둘러 화이트 배경 사이에 포인트를 준다. */}

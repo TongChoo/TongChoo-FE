@@ -68,7 +68,7 @@ function normalizeReplyOptions(excuse) {
 
         if (!trimmedOption || options.includes(trimmedOption)) return options;
         return [...options, trimmedOption];
-    }, []);
+    }, []).slice(0, 3);
 }
 
 function OptionCheckIcon() {
@@ -357,6 +357,20 @@ export default function ReplyThreadSection({
                     </li>
                     );
                 })}
+                {isSubmitting && (
+                    <li className="rounded-lg bg-surface-soft p-5 sm:p-7 animate-pulse">
+                        <div className="h-3.5 w-24 bg-border-soft rounded-md" />
+                        <div className="mt-3 h-4 w-3/4 bg-border-soft rounded-md" />
+                        <div className="mt-5 space-y-3">
+                            {Array.from({ length: 3 }, (_, index) => (
+                                <div
+                                    key={index}
+                                    className="h-14 bg-white border border-border-soft rounded-md"
+                                />
+                            ))}
+                        </div>
+                    </li>
+                )}
             </ol>
 
             {!isFormOpen && !isRoundLimitReached && (

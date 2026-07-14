@@ -85,6 +85,58 @@ function DotList({
     );
 }
 
+function DetailSkeleton() {
+    return (
+        <main className="max-w-7xl mx-auto px-6 py-12 bg-white animate-pulse">
+            <div className="h-4 w-24 bg-border-soft rounded-md" />
+            <div className="mt-4 h-7 w-32 bg-border-soft rounded-md" />
+
+            <section className="mt-6 bg-surface-soft rounded-lg p-6 sm:p-8">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="h-3 w-2/3 bg-border-input rounded-md" />
+                    <div className="h-3 w-16 shrink-0 bg-border-input rounded-md" />
+                </div>
+                <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex-1 space-y-2 border-l-4 border-border-soft pl-4 sm:pl-5">
+                        <div className="h-5 w-full bg-border-input rounded-md" />
+                        <div className="h-5 w-4/5 bg-border-input rounded-md" />
+                    </div>
+                    <div className="h-9 w-24 shrink-0 bg-border-input rounded-md" />
+                </div>
+            </section>
+
+            <section className="mt-6 py-6 sm:py-8">
+                <div className="h-4 w-32 bg-border-soft rounded-md" />
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {Array.from({ length: 4 }, (_, index) => (
+                        <div
+                            key={index}
+                            className="h-16 bg-surface-soft rounded-md"
+                        />
+                    ))}
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    {Array.from({ length: 2 }, (_, index) => (
+                        <div key={index}>
+                            <div className="h-3.5 w-24 bg-border-soft rounded-md" />
+                            <div className="mt-3 space-y-2">
+                                <div className="h-3 w-full bg-border-soft rounded-md" />
+                                <div className="h-3 w-2/3 bg-border-soft rounded-md" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-8">
+                    <div className="h-4 w-28 bg-border-soft rounded-md" />
+                    <div className="mt-4 h-3 w-full bg-border-soft rounded-md" />
+                </div>
+            </section>
+        </main>
+    );
+}
+
 function AftermathTimeline({ aftermath }) {
     if (!aftermath?.length) {
         return (
@@ -184,13 +236,7 @@ export default function ExcuseDetailPage() {
     }, [excuseId]);
 
     if (isLoading) {
-        return (
-            <main className="max-w-7xl mx-auto px-6 py-12 bg-white">
-                <p className="text-sm font-medium text-navy-500">
-                    변명 상세를 불러오는 중...
-                </p>
-            </main>
-        );
+        return <DetailSkeleton />;
     }
 
     if (errorMessage || !excuse) {

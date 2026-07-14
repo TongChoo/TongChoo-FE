@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { excuseApi } from "../../api/excuseApi";
 import Dropdown from "../../components/common/Dropdown";
 
@@ -25,6 +25,15 @@ const sortOptions = [
     { code: "aftermath", label: "후폭풍 임박순" },
 ];
 
+function formatTargetTone(excuse) {
+    const target =
+        excuse.target === "CUSTOM"
+            ? excuse.targetDescription || targetLabels.CUSTOM
+            : targetLabels[excuse.target] ?? excuse.target;
+
+    return `${target} · ${toneLabels[excuse.tone] ?? excuse.tone}`;
+}
+
 function formatDateTime(value) {
     if (!value) return "-";
     const date = new Date(value);
@@ -37,6 +46,51 @@ function formatDateTime(value) {
         hour: "2-digit",
         minute: "2-digit",
     }).format(date);
+}
+
+function SkeletonRow({ isLast }) {
+    return (
+        <tr
+            className={[
+                "animate-pulse",
+                isLast ? "" : "border-b border-border-soft",
+            ].join(" ")}
+        >
+            <td className="px-6 py-6">
+                <div className="h-4 w-3/4 bg-border-soft rounded-md" />
+                <div className="mt-2 h-3 w-1/3 bg-border-soft rounded-md" />
+            </td>
+            <td className="px-4 py-6">
+                <div className="h-4 w-24 bg-border-soft rounded-md" />
+            </td>
+            <td className="px-4 py-6">
+                <div className="h-4 w-10 bg-border-soft rounded-md" />
+            </td>
+            <td className="px-4 py-6">
+                <div className="h-4 w-12 bg-border-soft rounded-md" />
+            </td>
+            <td className="px-4 py-6">
+                <div className="h-4 w-28 bg-border-soft rounded-md" />
+            </td>
+            <td className="px-6 py-6 text-right">
+                <div className="ml-auto h-5 w-5 bg-border-soft rounded-md" />
+            </td>
+        </tr>
+    );
+}
+
+function SkeletonCard() {
+    return (
+        <li className="border border-border-soft rounded-lg p-5 animate-pulse">
+            <div className="h-4 w-4/5 bg-border-soft rounded-md" />
+            <div className="mt-3 flex flex-wrap gap-3">
+                <div className="h-3 w-20 bg-border-soft rounded-md" />
+                <div className="h-3 w-10 bg-border-soft rounded-md" />
+                <div className="h-3 w-12 bg-border-soft rounded-md" />
+            </div>
+            <div className="mt-3 h-3 w-28 bg-border-soft rounded-md" />
+        </li>
+    );
 }
 
 function AftermathBadge({ days }) {
@@ -83,8 +137,7 @@ export default function ExcuseHistoryPage() {
                 setIsLoading(true);
                 setErrorMessage("");
 
-                // docs/ui/excuse-history.html 기준: size=3으로 페이지네이션 UI를 보여준다.
-                const data = await excuseApi.getMyExcuses({ page, size: 3 });
+                const data = await excuseApi.getMyExcuses({ page, size: 10 });
 
                 if (!isMounted) return;
                 setExcusePage({
@@ -206,7 +259,7 @@ export default function ExcuseHistoryPage() {
                 </p>
             )}
 
-            <div className="mt-4 border border-border-soft rounded-lg overflow-hidden">
+            <div className="mt-4 hidden md:block border border-border-soft rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left">
                         <thead>
@@ -251,14 +304,12 @@ export default function ExcuseHistoryPage() {
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-6 py-10 text-center text-sm font-normal text-navy-300"
-                                    >
-                                        변명 기록을 불러오는 중...
-                                    </td>
-                                </tr>
+                                Array.from({ length: 5 }, (_, index) => (
+                                    <SkeletonRow
+                                        key={index}
+                                        isLast={index === 4}
+                                    />
+                                ))
                             ) : visibleExcuses.length === 0 ? (
                                 <tr>
                                     <td
@@ -272,11 +323,24 @@ export default function ExcuseHistoryPage() {
                                 visibleExcuses.map((excuse, index) => (
                                     <tr
                                         key={excuse.id}
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() =>
                                             navigate(`/excuses/${excuse.id}`)
                                         }
+                                        onKeyDown={(event) => {
+                                            if (
+                                                event.key === "Enter" ||
+                                                event.key === " "
+                                            ) {
+                                                event.preventDefault();
+                                                navigate(
+                                                    `/excuses/${excuse.id}`
+                                                );
+                                            }
+                                        }}
                                         className={[
-                                            "hover:bg-surface-soft transition-colors cursor-pointer",
+                                            "hover:bg-surface-soft focus-visible:bg-surface-soft focus-visible:outline-none transition-colors cursor-pointer",
                                             index !== visibleExcuses.length - 1
                                                 ? "border-b border-border-soft"
                                                 : "",
@@ -292,12 +356,7 @@ export default function ExcuseHistoryPage() {
                                         </td>
                                         <td className="px-4 py-6">
                                             <span className="text-sm font-medium text-brand-primary whitespace-nowrap">
-                                                {excuse.target === "CUSTOM"
-                                                    ? excuse.targetDescription || targetLabels.CUSTOM
-                                                    : targetLabels[excuse.target] ?? excuse.target}{" "}
-                                                ·{" "}
-                                                {toneLabels[excuse.tone] ??
-                                                    excuse.tone}
+                                                {formatTargetTone(excuse)}
                                             </span>
                                         </td>
                                         <td className="px-4 py-6 text-base font-bold text-brand-primary whitespace-nowrap">
@@ -334,6 +393,50 @@ export default function ExcuseHistoryPage() {
                     </table>
                 </div>
             </div>
+
+            <ul className="mt-4 md:hidden flex flex-col gap-3">
+                {isLoading ? (
+                    Array.from({ length: 4 }, (_, index) => (
+                        <SkeletonCard key={index} />
+                    ))
+                ) : visibleExcuses.length === 0 ? (
+                    <li className="px-5 py-10 text-center text-sm font-normal text-navy-300 border border-border-soft rounded-lg">
+                        검색 결과가 없습니다.
+                    </li>
+                ) : (
+                    visibleExcuses.map((excuse) => (
+                        <li key={excuse.id}>
+                            <Link
+                                to={`/excuses/${excuse.id}`}
+                                className="block border border-border-soft rounded-lg p-5 hover:bg-surface-soft transition-colors"
+                            >
+                                <p className="text-base font-medium text-navy-900">
+                                    {excuse.situation}
+                                </p>
+                                {Number(excuse.roundNumber) > 1 && (
+                                    <span className="mt-1 block text-xs font-bold text-brand-primary">
+                                        {excuse.roundNumber}라운드까지 진행
+                                    </span>
+                                )}
+                                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
+                                    <span className="font-medium text-brand-primary">
+                                        {formatTargetTone(excuse)}
+                                    </span>
+                                    <span className="font-bold text-brand-primary">
+                                        {excuse.successRate ?? 0}%
+                                    </span>
+                                    <AftermathBadge
+                                        days={excuse.nextAftermathInDays}
+                                    />
+                                </div>
+                                <p className="mt-2 text-xs font-normal text-navy-300">
+                                    {formatDateTime(excuse.createdAt)}
+                                </p>
+                            </Link>
+                        </li>
+                    ))
+                )}
+            </ul>
 
             <nav
                 aria-label="페이지네이션"
